@@ -10,8 +10,16 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Version>1.0.0</Version>
+    <Description>Replaces the random Forge of Potential idol upgrades with item experience. Max-level weapons, tools, shields and armor gain experience as you use them, and a full bar guarantees the upgrade.</Description>
     <!-- Unity ships older System.* facades than netstandard2.1; the conflicts are harmless. -->
     <NoWarn>$(NoWarn);MSB3277</NoWarn>
+  </PropertyGroup>
+
+  <!-- Thunderstore package metadata. Version and Description above are reused for the manifest. -->
+  <PropertyGroup>
+    <ThunderstoreName>WeaponExperience</ThunderstoreName>
+    <ThunderstoreWebsite></ThunderstoreWebsite>
+    <ThunderstoreDependencies>&quot;denikson-BepInExPack_Valheim-5.4.2351&quot;</ThunderstoreDependencies>
   </PropertyGroup>
 
   <!-- Override on the command line: dotnet build -p:ValheimDir=/path/to/Valheim -->
@@ -66,6 +74,43 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
+
+  <!-- Exposes the project Version to code so the plugin version has a single source. -->
+  <Target Name="GeneratePluginInfo" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <PluginInfoFile>$(IntermediateOutputPath)PluginInfo.g.cs</PluginInfoFile>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(PluginInfoFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+                      Lines="namespace WeaponExperience { internal static class PluginInfo { public const string Version = &quot;$(Version)&quot;%3B } }" />
+    <ItemGroup>
+      <Compile Include="$(PluginInfoFile)" />
+      <FileWrites Include="$(PluginInfoFile)" />
+    </ItemGroup>
+  </Target>
+
+  <!-- dotnet build -c Release -p:Package=true writes dist/WeaponExperience-<version>.zip for Thunderstore upload. -->
+  <Target Name="PackageThunderstore" AfterTargets="Build" Condition="'$(Package)' == 'true'">
+    <PropertyGroup>
+      <PackageStage>$(BaseIntermediateOutputPath)thunderstore/</PackageStage>
+      <PackageZip>$(MSBuildProjectDirectory)/dist/$(ThunderstoreName)-$(Version).zip</PackageZip>
+    </PropertyGroup>
+    <ItemGroup>
+      <ManifestLine Include="{" />
+      <ManifestLine Include="  &quot;name&quot;: &quot;$(ThunderstoreName)&quot;," />
+      <ManifestLine Include="  &quot;version_number&quot;: &quot;$(Version)&quot;," />
+      <ManifestLine Include="  &quot;website_url&quot;: &quot;$(ThunderstoreWebsite)&quot;," />
+      <ManifestLine Include="  &quot;description&quot;: &quot;$(Description)&quot;," />
+      <ManifestLine Include="  &quot;dependencies&quot;: [$(ThunderstoreDependencies)]" />
+      <ManifestLine Include="}" />
+    </ItemGroup>
+    <RemoveDir Directories="$(PackageStage)" />
+    <Copy SourceFiles="README.md;CHANGELOG.md;thunderstore/icon.png" DestinationFolder="$(PackageStage)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageStage)plugins" />
+    <WriteLinesToFile File="$(PackageStage)manifest.json" Lines="@(ManifestLine)" Overwrite="true" />
+    <MakeDir Directories="$(MSBuildProjectDirectory)/dist" />
+    <ZipDirectory SourceDirectory="$(PackageStage)" DestinationFile="$(PackageZip)" Overwrite="true" />
+    <Message Importance="high" Text="Thunderstore package: $(PackageZip)" />
+  </Target>
 
   <!-- dotnet build -p:Deploy=true copies the plugin into the local BepInEx plugins folder. -->
   <Target Name="DeployToBepInEx" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">

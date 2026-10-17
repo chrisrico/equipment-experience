@@ -20,6 +20,15 @@ player name, and a failed roll can destroy the item or take a level off it. With
 Experience is stored in each item's custom data. It is saved with your character and stays with the item when it goes
 into a chest or to another player. An upgrade starts the new level with an empty bar.
 
+## Installation
+
+- **Mod manager:** install with r2modman or Thunderstore Mod Manager. BepInExPack_Valheim is installed for you as a
+  dependency.
+- **Manual:** install [BepInExPack_Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/), then
+  copy `plugins/WeaponExperience.dll` into `BepInEx/plugins/`.
+
+The mod is client-side. You don't need it on the server, and other players don't need it.
+
 ## Configuration
 
 Config file: `BepInEx/config/chrisrico.weaponexperience.cfg`
@@ -54,7 +63,9 @@ the item's crafting materials, the same as when vanilla breaks an item. The "los
 
 ### Multiplayer
 
-The config is not synced from the server. Each player's own settings apply to their own items.
+The config is not synced from the server. Each player's own settings apply to their own items. Experience is stored on
+the item itself, so an item keeps its experience when you give it to a player who doesn't have the mod. It only gains
+more experience, or upgrades through experience, for players who have the mod.
 
 ## Compatibility with game updates
 
@@ -79,4 +90,11 @@ You need the .NET SDK (6 or later) and a Valheim install with BepInEx.
 dotnet build -c Release                     # produces bin/Release/WeaponExperience.dll
 dotnet build -c Release -p:Deploy=true      # also copies it into BepInEx/plugins/WeaponExperience
 dotnet build -c Release -p:ValheimDir=/path/to/Valheim   # if Valheim isn't in the default Steam location
+dotnet build -c Release -p:Package=true     # also writes dist/WeaponExperience-<version>.zip for Thunderstore
 ```
+
+To release a new version:
+1. Update `<Version>` in `WeaponExperience.csproj`. The plugin version and the Thunderstore manifest both read it from
+   there.
+2. Add an entry to `CHANGELOG.md`.
+3. Upload the zip.

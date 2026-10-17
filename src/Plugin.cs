@@ -10,7 +10,7 @@ namespace WeaponExperience
     {
         public const string PluginGuid = "chrisrico.weaponexperience";
         public const string PluginName = "Weapon Experience";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = PluginInfo.Version;
 
         public static ConfigEntry<float> ExperienceRate;
         public static ConfigEntry<float> WeaponExperienceRate;

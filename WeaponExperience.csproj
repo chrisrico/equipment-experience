@@ -18,7 +18,7 @@
   <!-- Thunderstore package metadata. Version and Description above are reused for the manifest. -->
   <PropertyGroup>
     <ThunderstoreName>WeaponExperience</ThunderstoreName>
-    <ThunderstoreWebsite></ThunderstoreWebsite>
+    <ThunderstoreWebsite>https://github.com/chrisrico/weapon-experience</ThunderstoreWebsite>
     <ThunderstoreDependencies>&quot;denikson-BepInExPack_Valheim-5.4.2351&quot;</ThunderstoreDependencies>
   </PropertyGroup>
 

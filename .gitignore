@@ -4,3 +4,4 @@ obj/
 .vs/
 .idea/
 dist/
+.DS_Store

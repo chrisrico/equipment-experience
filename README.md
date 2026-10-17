@@ -34,7 +34,6 @@ Config file: `BepInEx/config/chrisrico.weaponexperience.cfg`
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
 | Upgrading  | `AllowPartialUpgrade`         | false             | Allow upgrading before the bar is full. |
 | Upgrading  | `PartialBaseChanceMultiplier` | 1.0               | Scales the idol's base chance used for partial upgrades. |
-| Upgrading  | `PartialFailurePenalty`       | `ResetExperience` | What a failed partial upgrade costs: `ResetExperience`, `None` or `Vanilla`. |
 | General    | `NotifyWhenReady`             | true              | Show a message when an item's bar fills. |
 
 ### Partial upgrades
@@ -50,15 +49,27 @@ So the chance starts at the idol's own chance with an empty bar and rises in a s
 Set `PartialBaseChanceMultiplier = 0` if you want the chance to be exactly how full the bar is. The roll is truly
 random: it is not seeded, so you can't predict or replay it.
 
-A failed attempt always uses up the idol and the materials. `PartialFailurePenalty` decides what else happens:
-
-- `ResetExperience`: you keep the item, but its bar is emptied.
-- `None`: you keep the item and its experience.
-- `Vanilla`: the item is destroyed or loses a level, the same as in the base game.
+A failed attempt destroys the item. The idol and materials are used up, and the game gives back the usual share of
+the item's crafting materials, the same as when vanilla breaks an item. The "lose a level" outcome no longer happens.
 
 ### Multiplayer
 
 The config is not synced from the server. Each player's own settings apply to their own items.
+
+## Compatibility with game updates
+
+Most of the forge upgrade is still vanilla's own code. The mod decides whether the upgrade succeeds, then hands vanilla
+a roll that forces that outcome, so anything Iron Gate adds to the upgrade process still runs.
+
+The patches are applied in independent groups: weapon/shield experience, armor experience, the tooltip, the forge
+upgrade and the forge panel.
+
+- **At startup**, each group checks that every game member it uses still exists. If an update renamed one, that group
+  is turned off and the BepInEx log names the missing member and the game version. The other groups keep working.
+- **If the forge upgrade group can't load**, the forge panel is turned off as well, so it can't promise a guaranteed
+  upgrade. The log then says the vanilla random mechanic is active.
+- **If a patch throws an error while the game is running**, the error is logged once and the game carries on. If the
+  forge upgrade patch fails, the upgrade is blocked rather than handed back to the vanilla gamble.
 
 ## Building
 

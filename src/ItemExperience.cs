@@ -16,6 +16,16 @@ namespace WeaponExperience
         private static readonly Dictionary<string, Recipe> ForgeRecipes = new Dictionary<string, Recipe>();
         private static ObjectDB _cachedDb;
 
+        /// <summary>Game members everything in this class relies on, for <see cref="PatchGroup"/> startup checks.</summary>
+        public static PatchGroup RequireCore(PatchGroup group)
+        {
+            return group
+                .RequireField(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.m_customData))
+                .RequireField(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_maxQuality))
+                .RequireField(typeof(ObjectDB), nameof(ObjectDB.m_recipes))
+                .RequireField(typeof(Piece.Requirement), nameof(Piece.Requirement.m_upgraderResource));
+        }
+
         /// <summary>The recipe that upgrades this item at the Forge of Potential, or null if there isn't one.</summary>
         public static Recipe GetForgeRecipe(ItemDrop.ItemData item)
         {
@@ -123,22 +133,6 @@ namespace WeaponExperience
                 string name = Localization.instance.Localize(item.m_shared.m_name);
                 Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft,
                     $"{name} is ready to be upgraded at the Forge of Potential", 0, item.GetIcon());
-            }
-        }
-
-        /// <summary>Copies an item's custom data onto its replacement, dropping the experience (the level changed).</summary>
-        public static void CarryOverCustomData(ItemDrop.ItemData from, ItemDrop.ItemData to)
-        {
-            if (from?.m_customData == null || to == null)
-            {
-                return;
-            }
-            foreach (KeyValuePair<string, string> entry in from.m_customData)
-            {
-                if (entry.Key != ExperienceKey)
-                {
-                    to.m_customData[entry.Key] = entry.Value;
-                }
             }
         }
 

@@ -1,19 +1,10 @@
 using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using HarmonyLib;
 
 namespace WeaponExperience
 {
-    public enum FailurePenalty
-    {
-        /// <summary>Keep the item, but its experience bar is emptied.</summary>
-        ResetExperience,
-        /// <summary>Keep the item and its experience; only the idol and materials are spent.</summary>
-        None,
-        /// <summary>Vanilla behaviour: the item is either destroyed or loses a level.</summary>
-        Vanilla,
-    }
-
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public class Plugin : BaseUnityPlugin
     {
@@ -29,13 +20,16 @@ namespace WeaponExperience
         public static ConfigEntry<float> ExperienceGrowth;
         public static ConfigEntry<bool> AllowPartialUpgrade;
         public static ConfigEntry<float> PartialBaseChanceMultiplier;
-        public static ConfigEntry<FailurePenalty> PartialFailurePenalty;
         public static ConfigEntry<bool> NotifyWhenReady;
+
+        public static ManualLogSource Log;
 
         private Harmony _harmony;
 
         private void Awake()
         {
+            Log = Logger;
+
             ExperienceRate = Config.Bind("Experience", "ExperienceRate", 1f,
                 new ConfigDescription("Global multiplier applied to all experience gained by items.",
                     new AcceptableValueRange<float>(0f, 100f)));
@@ -65,21 +59,28 @@ namespace WeaponExperience
             AllowPartialUpgrade = Config.Bind("Upgrading", "AllowPartialUpgrade", false,
                 "Allow upgrading at the Forge of Potential before the experience bar is full. " +
                 "Success is then not guaranteed: the chance starts at the idol's base chance and rises " +
-                "linearly to 100% as the bar fills.");
+                "linearly to 100% as the bar fills. A failed attempt destroys the item.");
             PartialBaseChanceMultiplier = Config.Bind("Upgrading", "PartialBaseChanceMultiplier", 1f,
                 new ConfigDescription(
                     "Scales the idol's base success chance used for partial upgrades. " +
                     "1 = idol's normal chance at an empty bar; 0 = success chance equals how full the bar is.",
                     new AcceptableValueRange<float>(0f, 1f)));
-            PartialFailurePenalty = Config.Bind("Upgrading", "PartialFailurePenalty", FailurePenalty.ResetExperience,
-                "What happens when a partial upgrade fails. The idol and materials are always consumed. " +
-                "ResetExperience: item kept, experience bar emptied. None: item and experience kept. " +
-                "Vanilla: item is destroyed or loses a level, as in the base game.");
             NotifyWhenReady = Config.Bind("General", "NotifyWhenReady", true,
                 "Show a message when an item's experience bar becomes full.");
 
             _harmony = new Harmony(PluginGuid);
-            _harmony.PatchAll(typeof(Plugin).Assembly);
+            WeaponExperiencePatch.Group().Apply(_harmony);
+            ArmorExperiencePatch.Group().Apply(_harmony);
+            TooltipPatch.Group().Apply(_harmony);
+            if (ForgeUpgradePatch.Group().Apply(_harmony))
+            {
+                // The panel promises guaranteed upgrades, so only show it when the forge logic is active.
+                ForgePanelPatch.Group().Apply(_harmony);
+            }
+            else
+            {
+                Log.LogError("The Forge of Potential is using the vanilla random upgrade mechanic.");
+            }
         }
 
         private void OnDestroy()

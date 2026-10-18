@@ -2,16 +2,17 @@
 
 A BepInEx mod for Valheim that replaces the random Forge of Potential upgrade with an experience system.
 
-In the base game, upgrading with an idol is a gamble. The roll comes from a PRNG seeded with the item, its level and your
-player name, and a failed roll can destroy the item or take a level off it. With this mod:
+In the base game, refining an item with an idol is a gamble. Every idol succeeds 65% of the time, and every failure
+destroys the item, giving back only 35% of its crafting materials. The roll comes from a PRNG seeded with the item type,
+the target level and your player name. With this mod:
 
 - **Items at their maximum crafting level gain experience as you use them.** This covers every item the Forge of
   Potential can upgrade:
-  - **Weapons and tools** gain experience on every hit that raises their skill. That includes melee hits, arrows and
-    bolts that land, magic, and chopping or mining with an axe or pickaxe.
-  - **Shields** gain experience on every successful block. A parry (perfect block) gives 3× by default. If you block
+  - **Weapons and tools** gain experience on every hit that raises their own skill: melee hits, arrows and bolts that
+    land, magic, and chopping or mining with the right tool.
+  - **Shields** gain experience on every block. A parry (perfect block) gives 3× by default. If you block
     without a shield, the weapon you block with gets the experience.
-  - **Armor** pieces you are wearing gain experience in two ways:
+  - **Armor** pieces you are wearing (helmet, chest, legs and cape) gain experience in two ways:
     - **Hits from attackers:** experience scales with the hit's damage, measured before your armor reduces it.
       Stronger armor doesn't slow its own leveling, and a hit that is partly blocked only counts the damage that got
       through the block.
@@ -60,12 +61,12 @@ base   = idolUpgradeChance * PartialBaseChanceMultiplier
 chance = base + (1 - base) * fill        (fill = experience / required, from 0 to 1)
 ```
 
-So the chance starts at the idol's own chance with an empty bar and rises in a straight line to 100% with a full bar.
-Set `PartialBaseChanceMultiplier = 0` if you want the chance to be exactly how full the bar is. The roll is truly
-random: it is not seeded, so you can't predict or replay it.
+So the chance starts at the idol's own chance (65% for every vanilla idol) with an empty bar and rises in a straight
+line to 100% with a full bar. Set `PartialBaseChanceMultiplier = 0` if you want the chance to be exactly how full the
+bar is. The roll is truly random: it is not seeded, so you can't predict or replay it.
 
-A failed attempt destroys the item. The idol and materials are used up, and the game gives back the usual share of
-the item's crafting materials, the same as when vanilla breaks an item. The "lose a level" outcome no longer happens.
+A failed attempt destroys the item, the same as a failed vanilla refinement. The idol and materials are used up, and
+the game gives back 35% of the item's crafting materials.
 
 ### Multiplayer
 

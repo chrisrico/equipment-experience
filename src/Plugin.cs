@@ -20,17 +20,17 @@ namespace EquipmentExperience
         public static ConfigEntry<float> ArmorShareOfBlockExperience;
         public static ConfigEntry<float> BaseExperience;
         public static ConfigEntry<float> ExperienceGrowth;
-        public static ConfigEntry<bool> AllowPartialUpgrade;
-        public static ConfigEntry<float> PartialBaseChanceMultiplier;
         public static ConfigEntry<bool> NotifyWhenReady;
 
         public static ManualLogSource Log;
+        public static Plugin Instance;
 
         private Harmony _harmony;
 
         private void Awake()
         {
             Log = Logger;
+            Instance = this;
 
             ExperienceRate = Config.Bind("Experience", "ExperienceRate", 1f,
                 new ConfigDescription("Global multiplier applied to all experience gained by items.",
@@ -69,17 +69,9 @@ namespace EquipmentExperience
                 new ConfigDescription("Multiplier applied to the required experience for each further forge level.",
                     new AcceptableValueRange<float>(1f, 10f)));
 
-            AllowPartialUpgrade = Config.Bind("Upgrading", "AllowPartialUpgrade", false,
-                "Allow upgrading at the Forge of Potential before the experience bar is full. " +
-                "Success is then not guaranteed: the chance starts at the idol's base chance and rises " +
-                "linearly to 100% as the bar fills. A failed attempt destroys the item.");
-            PartialBaseChanceMultiplier = Config.Bind("Upgrading", "PartialBaseChanceMultiplier", 1f,
-                new ConfigDescription(
-                    "Scales the idol's base success chance used for partial upgrades. " +
-                    "1 = idol's normal chance at an empty bar; 0 = success chance equals how full the bar is.",
-                    new AcceptableValueRange<float>(0f, 1f)));
             NotifyWhenReady = Config.Bind("General", "NotifyWhenReady", true,
                 "Show a message when an item's experience bar becomes full.");
+            Guardians.BindConfig(Config);
 
             _harmony = new Harmony(PluginGuid);
             WeaponExperiencePatch.Group().Apply(_harmony);
@@ -89,6 +81,7 @@ namespace EquipmentExperience
             {
                 // The panel promises guaranteed upgrades, so only show it when the forge logic is active.
                 ForgePanelPatch.Group().Apply(_harmony);
+                Guardians.SetAvailable(Guardians.Requirements().Apply(_harmony));
             }
             else
             {

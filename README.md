@@ -18,7 +18,8 @@ the target level and your player name. With this mod:
       is measured before your armor reduces it, so stronger armor doesn't slow its own leveling. A hit that is partly
       blocked only counts the damage that got through the block.
     - **Blocks:** every block also gives each worn piece a share of the block's experience.
-- **When the bar is full, the upgrade always succeeds** if you have the right idol.
+- **An upgrade needs a full bar, and then it always succeeds** if you have the right idol.
+- **Every upgrade awakens the forge's guardians.** Creatures from the idol's biome spawn around the forge and attack.
 - An item's experience shows in its tooltip. At the forge you also see the bar and the success chance.
 - Items below their maximum crafting level can't be upgraded at the Forge of Potential. Upgrade them at their normal
   crafting station first.
@@ -49,8 +50,8 @@ Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
 | Experience | `ArmorShareOfBlockExperience` | 0.5               | Fraction of a block's experience (before the parry bonus) that each worn piece also gains. |
 | Leveling   | `BaseExperience`              | 500               | Experience needed for the first forge upgrade. |
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
-| Upgrading  | `AllowPartialUpgrade`         | false             | Allow upgrading before the bar is full. |
-| Upgrading  | `PartialBaseChanceMultiplier` | 1.0               | Scales the idol's base chance used for partial upgrades. |
+| Guardians  | `SpawnGuardians`              | true              | Summon guardians whenever an item is refined. |
+| Guardians  | `Tier0Wooden` … `Tier7Bloodgold` | see below      | Which guardians each idol tier summons. |
 | General    | `NotifyWhenReady`             | true              | Show a message when an item's bar fills. |
 
 ### Balance
@@ -81,21 +82,29 @@ harder to reach:
 To level everything faster or slower, change `ExperienceRate`. To flatten or steepen the curve, change
 `ExperienceGrowth`.
 
-### Partial upgrades
+### Guardians
 
-With `AllowPartialUpgrade = true`, you can try an upgrade before the bar is full:
+Each refinement awakens the forge's guardians about two seconds after the upgrade finishes. They spawn 6–10 m from the
+forge and hunt you straight away. The upgraded item is already yours: the fight is the price of the upgrade, not a
+condition for it. Guardians drop their normal loot.
 
-```
-base   = idolUpgradeChance * PartialBaseChanceMultiplier
-chance = base + (1 - base) * fill        (fill = experience / required, from 0 to 1)
-```
+Which guardians appear depends on the idol's tier:
 
-So the chance starts at the idol's own chance (65% for every vanilla idol) with an empty bar and rises in a straight
-line to 100% with a full bar. Set `PartialBaseChanceMultiplier = 0` if you want the chance to be exactly how full the
-bar is. The roll is truly random: it is not seeded, so you can't predict or replay it.
+| Idol | Biome | Default guardians |
+|---|---|---|
+| Wooden | Meadows / Black Forest | 2 Greydwarf brutes |
+| Bronze | Black Forest | Troll |
+| Iron | Swamp | Abomination, Draugr elite |
+| Silver | Mountains | Stone golem |
+| Black Metal | Plains | Fuling berserker, 2 Fulings |
+| Black Marble | Mistlands | Seeker soldier, 2 Seekers |
+| Flametal | Ashlands | Fallen Valkyrie, Charred warrior |
+| Bloodgold | Deep North | Jotun warrior, Jotun witch |
 
-A failed attempt destroys the item, the same as a failed vanilla refinement. The idol and materials are used up, and
-the game gives back 35% of the item's crafting materials.
+Guardians get tougher as the item does: +1 star at forge levels +3 and +4, and +2 stars from +5. Each tier's setting
+is a comma-separated list of `Prefab:count` or `Prefab:count:stars` entries, using the game's prefab names (the same
+names the `spawn` console command takes). Keep each tier to one faction, because creatures from different factions
+fight each other instead of you.
 
 ### Multiplayer
 
@@ -109,7 +118,8 @@ Most of the forge upgrade is still vanilla's own code. The mod decides whether t
 a roll that forces that outcome, so anything Iron Gate adds to the upgrade process still runs.
 
 The patches are applied in independent groups: weapon/shield experience, armor experience, the tooltip, the forge
-upgrade, and the forge panel.
+upgrade, and the forge panel. The guardians have their own startup check. If it fails, upgrades still work, just without
+guardians.
 
 - **At startup**, each group checks that every game member it uses still exists. If an update renamed one, that group
   is turned off and the BepInEx log names the missing member and the game version. The other groups keep working.

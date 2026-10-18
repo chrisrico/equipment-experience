@@ -4,53 +4,50 @@ using UnityEngine;
 
 namespace EquipmentExperience
 {
-    /// <summary>Whether an item can be upgraded at the forge right now, and with what chance.</summary>
+    /// <summary>Whether an item can be upgraded at the forge right now, and if not, why.</summary>
     public readonly struct ForgeVerdict
     {
         public readonly bool Allowed;
-        public readonly float Chance;
         public readonly string Reason;
 
-        private ForgeVerdict(bool allowed, float chance, string reason)
+        private ForgeVerdict(bool allowed, string reason)
         {
             Allowed = allowed;
-            Chance = chance;
             Reason = reason;
         }
 
-        public static ForgeVerdict Evaluate(ItemDrop.ItemData item, ItemDrop.ItemData idol)
+        public static ForgeVerdict Evaluate(ItemDrop.ItemData item)
         {
             if (!Experience.IsAtMaxCraftingLevel(item))
             {
-                return new ForgeVerdict(false, 0f, "Reach the maximum crafting level before using the Forge of Potential");
+                return new ForgeVerdict(false, "Reach the maximum crafting level before using the Forge of Potential");
             }
-            float fill = Experience.GetFill(item);
-            if (fill >= 1f)
+            if (Experience.GetFill(item) < 1f)
             {
-                return new ForgeVerdict(true, 1f, null);
+                return new ForgeVerdict(false, "Not enough experience to upgrade");
             }
-            if (!Plugin.AllowPartialUpgrade.Value)
-            {
-                return new ForgeVerdict(false, 0f, "Not enough experience to upgrade");
-            }
-            float baseChance = Mathf.Clamp01(idol.m_shared.m_upgradeChance * Plugin.PartialBaseChanceMultiplier.Value);
-            return new ForgeVerdict(true, baseChance + (1f - baseChance) * fill, null);
+            return new ForgeVerdict(true, null);
         }
     }
 
     /// <summary>
-    /// Decides the outcome of a forge upgrade from the item's experience, then lets vanilla carry it out.
-    /// Vanilla's DoCrafting asks Player.GetItemUpgradeChance for a roll r and succeeds when
-    /// idol.m_upgradeChance >= r, otherwise destroys the item when idol.m_breakChance >= 1 - r.
-    /// We answer that call with a roll that forces the outcome we picked.
+    /// Allows a forge upgrade only with a full experience bar, then lets vanilla carry it out and summons guardians.
+    /// Vanilla's DoCrafting asks Player.GetItemUpgradeChance for a roll r and succeeds when idol.m_upgradeChance >= r;
+    /// we answer that call with 0 so the upgrade always succeeds.
     /// </summary>
     public static class ForgeUpgradePatch
     {
         private const float SuccessRoll = 0f;
-        private const float BreakRoll = 1.0001f;
 
-        private static readonly System.Random Rng = new System.Random();
-        private static float? _pendingRoll;
+        private struct PendingUpgrade
+        {
+            public int IdolTier;
+            public int ForgeLevel;
+            public Vector3 ForgePosition;
+            public bool Performed;
+        }
+
+        private static PendingUpgrade? _pending;
 
         public static PatchGroup Group()
         {
@@ -60,7 +57,6 @@ namespace EquipmentExperience
                 .RequireField(typeof(InventoryGui), nameof(InventoryGui.m_craftUpgradeItem))
                 .RequireField(typeof(CraftingStation), nameof(CraftingStation.m_upgrader))
                 .RequireField(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_upgradeChance))
-                .RequireField(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_breakChance))
                 .Patch(typeof(ForgeUpgradePatch), typeof(InventoryGui), nameof(InventoryGui.DoCrafting),
                     new[] { typeof(Player) }, HarmonyPatchType.Prefix, nameof(Prefix))
                 .Patch(typeof(ForgeUpgradePatch), typeof(InventoryGui), nameof(InventoryGui.DoCrafting),
@@ -71,7 +67,7 @@ namespace EquipmentExperience
 
         private static bool Prefix(InventoryGui __instance, Player player)
         {
-            _pendingRoll = null;
+            _pending = null;
             try
             {
                 return Decide(__instance, player);
@@ -94,41 +90,50 @@ namespace EquipmentExperience
             {
                 return true;
             }
-            ItemDrop.ItemData idol = Experience.GetIdol(gui.m_craftRecipe);
-            if (idol == null)
+            if (Experience.GetIdol(gui.m_craftRecipe) == null)
             {
                 return true; // vanilla reports the missing requirement
             }
 
-            ForgeVerdict verdict = ForgeVerdict.Evaluate(item, idol);
+            ForgeVerdict verdict = ForgeVerdict.Evaluate(item);
             if (!verdict.Allowed)
             {
                 player.Message(MessageHud.MessageType.Center, verdict.Reason);
                 return false;
             }
-            bool success = verdict.Chance >= 1f || Rng.NextDouble() < verdict.Chance;
-            _pendingRoll = success ? SuccessRoll : BreakRoll;
+            _pending = new PendingUpgrade
+            {
+                IdolTier = Guardians.GetTier(gui.m_craftRecipe),
+                ForgeLevel = item.m_quality + 1 - item.m_shared.m_maxQuality,
+                ForgePosition = station.transform.position,
+            };
             return true;
         }
 
-        private static void Finalizer()
+        private static void Finalizer(Exception __exception)
         {
-            _pendingRoll = null;
+            PendingUpgrade? pending = _pending;
+            _pending = null;
+            if (__exception == null && pending is { Performed: true } upgrade)
+            {
+                Guardians.Summon(upgrade.IdolTier, upgrade.ForgeLevel, upgrade.ForgePosition);
+            }
         }
 
         private static bool UpgradeChancePrefix(ref float __result)
         {
-            if (_pendingRoll == null)
+            if (_pending is not { Performed: false } upgrade)
             {
                 return true;
             }
-            __result = _pendingRoll.Value;
-            _pendingRoll = null;
+            upgrade.Performed = true;
+            _pending = upgrade;
+            __result = SuccessRoll;
             return false;
         }
     }
 
-    /// <summary>Shows experience and success chance in the forge and disables the button when not allowed.</summary>
+    /// <summary>Shows experience in the forge, warns about guardians, and disables the button when not allowed.</summary>
     public static class ForgePanelPatch
     {
         public static PatchGroup Group()
@@ -163,13 +168,12 @@ namespace EquipmentExperience
             {
                 return;
             }
-            ItemDrop.ItemData idol = Experience.GetIdol(recipe);
-            if (idol == null)
+            if (Experience.GetIdol(recipe) == null)
             {
                 return;
             }
 
-            ForgeVerdict verdict = ForgeVerdict.Evaluate(item, idol);
+            ForgeVerdict verdict = ForgeVerdict.Evaluate(item);
             string text;
             if (!Experience.IsAtMaxCraftingLevel(item))
             {
@@ -179,12 +183,8 @@ namespace EquipmentExperience
             {
                 text = $"Experience: {Experience.FormatProgress(item)}\n";
                 text += verdict.Allowed
-                    ? $"Success chance: {Mathf.FloorToInt(verdict.Chance * 100f)}%"
+                    ? Guardians.Enabled.Value ? "Ready. <color=orange>Refining will awaken the forge's guardians.</color>" : "Ready."
                     : $"<color=orange>{verdict.Reason}</color>";
-                if (verdict.Allowed && verdict.Chance < 1f)
-                {
-                    text += " <color=orange>(failure destroys the item)</color>";
-                }
             }
             gui.m_itemCraftType.gameObject.SetActive(true);
             gui.m_itemCraftType.text = text;

@@ -1,5 +1,6 @@
 using System;
 using HarmonyLib;
+using UnityEngine;
 
 namespace EquipmentExperience
 {
@@ -59,7 +60,8 @@ namespace EquipmentExperience
     }
 
     /// <summary>
-    /// Armor gains experience in proportion to the damage of each hit it takes. Vanilla calls
+    /// Armor gains experience in proportion to each hit's damage relative to the wearer's max health, so the pace is
+    /// similar in every biome (enemy damage and player health rise together). Vanilla calls
     /// Player.DamageArmorDurability right after HitData.ApplyArmor for every hit on a player, so the damage is
     /// recorded in ApplyArmor (before armor reduces it) and spent in DamageArmorDurability.
     /// </summary>
@@ -73,6 +75,7 @@ namespace EquipmentExperience
             return new PatchGroup("Armor experience")
                 .With(Experience.RequireCore)
                 .With(RequireArmorSlots)
+                .RequireMethod(typeof(Character), nameof(Character.GetMaxHealth))
                 .Patch(typeof(ArmorExperiencePatch), typeof(HitData), nameof(HitData.ApplyArmor),
                     new[] { typeof(float) }, HarmonyPatchType.Prefix, nameof(ApplyArmorPrefix))
                 .Patch(typeof(ArmorExperiencePatch), typeof(Player), nameof(Player.DamageArmorDurability),
@@ -138,7 +141,13 @@ namespace EquipmentExperience
             }
             // Falls back to the post-armor damage if a game update separates the two calls.
             float damage = hit == _armorHit ? _damageBeforeArmor : ArmorDamage(hit);
-            AddToWornArmor(player, damage * Plugin.ArmorExperiencePerDamage.Value);
+            float maxHealth = player.GetMaxHealth();
+            if (maxHealth <= 0f)
+            {
+                return;
+            }
+            float healthFraction = Mathf.Min(damage / maxHealth, 1f);
+            AddToWornArmor(player, healthFraction * Plugin.ArmorExperiencePerMaxHealth.Value);
         }
 
         /// <summary>The damage vanilla counts against armor durability.</summary>

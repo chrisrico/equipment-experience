@@ -10,12 +10,13 @@ the target level and your player name. With this mod:
   Potential can upgrade:
   - **Weapons and tools** gain experience on every hit that raises their own skill: melee hits, arrows and bolts that
     land, magic, and chopping or mining with the right tool.
-  - **Shields** gain experience on every block. A parry (perfect block) gives 3× by default. If you block
+  - **Shields** gain experience on every block. A parry (perfect block) gives 2× by default. If you block
     without a shield, the weapon you block with gets the experience.
   - **Armor** pieces you are wearing (helmet, chest, legs and cape) gain experience in two ways:
-    - **Hits from attackers:** experience scales with the hit's damage, measured before your armor reduces it.
-      Stronger armor doesn't slow its own leveling, and a hit that is partly blocked only counts the damage that got
-      through the block.
+    - **Hits from attackers:** experience scales with how big the hit is compared with your max health. Enemy
+      damage and your health rise together from biome to biome, so armor levels at a similar pace everywhere. Damage
+      is measured before your armor reduces it, so stronger armor doesn't slow its own leveling. A hit that is partly
+      blocked only counts the damage that got through the block.
     - **Blocks:** every block also gives each worn piece a share of the block's experience.
 - **When the bar is full, the upgrade always succeeds** if you have the right idol.
 - An item's experience shows in its tooltip. At the forge you also see the bar and the success chance.
@@ -42,15 +43,43 @@ Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
 |------------|-------------------------------|-------------------|-------------|
 | Experience | `ExperienceRate`              | 1.0               | Global multiplier on all experience gained. |
 | Experience | `WeaponExperienceRate`        | 1.0               | Experience per point of weapon or tool skill experience earned (about 1 per hit). |
-| Experience | `ShieldExperienceRate`        | 1.0               | Experience per block, for the blocking item. |
-| Experience | `ParryExperienceMultiplier`   | 3.0               | Multiplier on the blocking item's experience for a parry. |
-| Experience | `ArmorExperiencePerDamage`    | 0.1               | Experience per point of damage in a hit from an attacker (before armor), for each worn piece. |
+| Experience | `ShieldExperienceRate`        | 2.0               | Experience per block, for the blocking item. |
+| Experience | `ParryExperienceMultiplier`   | 2.0               | Multiplier on the blocking item's experience for a parry. |
+| Experience | `ArmorExperiencePerMaxHealth` | 12                | Experience for each worn piece from a hit equal to your max health (smaller hits give a proportional share). |
 | Experience | `ArmorShareOfBlockExperience` | 0.5               | Fraction of a block's experience (before the parry bonus) that each worn piece also gains. |
 | Leveling   | `BaseExperience`              | 500               | Experience needed for the first forge upgrade. |
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
 | Upgrading  | `AllowPartialUpgrade`         | false             | Allow upgrading before the bar is full. |
 | Upgrading  | `PartialBaseChanceMultiplier` | 1.0               | Scales the idol's base chance used for partial upgrades. |
 | General    | `NotifyWhenReady`             | true              | Show a message when an item's bar fills. |
+
+### Balance
+
+The defaults are tuned so a weapon, a shield and each armor piece fill their bars at roughly the same pace while you
+adventure. The estimates below are per enemy you fight at your gear's tier.
+
+| Item | Where the experience comes from | XP per enemy |
+|---|---|---|
+| Weapon | about 4 hits landed × 1 XP | about 4 |
+| Shield | 1 block × 2 XP, plus half a parry × 4 XP | about 4 |
+| Armor, with a shield | 1.5 blocks × 1 XP, plus 0.75 hits taken × 35% of your health × 12 | about 4.6 |
+| Armor, no shield | 1 hit taken × 35% of your health × 12 | about 4.2 |
+
+Two figures here come from the game files: almost every weapon raises its skill by exactly 1 per hit, and every forge
+recipe costs a single idol per level. Because the idol cost never rises, the experience curve is what makes each level
+harder to reach:
+
+| Forge level | XP needed | About how many enemies | Running total |
+|---|---|---|---|
+| +1 | 500   | 125 | 125   |
+| +2 | 750   | 190 | 310   |
+| +3 | 1,125 | 280 | 595   |
+| +4 | 1,690 | 420 | 1,015 |
+| +5 | 2,530 | 635 | 1,650 |
+| +6 | 3,800 | 950 | 2,600 |
+
+To level everything faster or slower, change `ExperienceRate`. To flatten or steepen the curve, change
+`ExperienceGrowth`.
 
 ### Partial upgrades
 

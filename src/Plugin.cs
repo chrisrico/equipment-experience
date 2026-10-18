@@ -16,7 +16,7 @@ namespace EquipmentExperience
         public static ConfigEntry<float> WeaponExperienceRate;
         public static ConfigEntry<float> ShieldExperienceRate;
         public static ConfigEntry<float> ParryExperienceMultiplier;
-        public static ConfigEntry<float> ArmorExperiencePerDamage;
+        public static ConfigEntry<float> ArmorExperiencePerMaxHealth;
         public static ConfigEntry<float> ArmorShareOfBlockExperience;
         public static ConfigEntry<float> BaseExperience;
         public static ConfigEntry<float> ExperienceGrowth;
@@ -40,19 +40,21 @@ namespace EquipmentExperience
                     "Experience a weapon or tool gains per point of skill experience it earns you " +
                     "(i.e. every hit that would raise your weapon/tool skill).",
                     new AcceptableValueRange<float>(0f, 100f)));
-            ShieldExperienceRate = Config.Bind("Experience", "ShieldExperienceRate", 1f,
+            ShieldExperienceRate = Config.Bind("Experience", "ShieldExperienceRate", 2f,
                 new ConfigDescription(
                     "Experience the blocking item (shield, or weapon if no shield) gains per block.",
                     new AcceptableValueRange<float>(0f, 100f)));
-            ParryExperienceMultiplier = Config.Bind("Experience", "ParryExperienceMultiplier", 3f,
+            ParryExperienceMultiplier = Config.Bind("Experience", "ParryExperienceMultiplier", 2f,
                 new ConfigDescription(
                     "Multiplier on the blocking item's experience for a parry (perfect block).",
                     new AcceptableValueRange<float>(1f, 100f)));
-            ArmorExperiencePerDamage = Config.Bind("Experience", "ArmorExperiencePerDamage", 0.1f,
+            ArmorExperiencePerMaxHealth = Config.Bind("Experience", "ArmorExperiencePerMaxHealth", 12f,
                 new ConfigDescription(
-                    "Experience each equipped armor piece gains per point of damage in a hit from an attacker, " +
-                    "measured before your armor reduces it (after any block).",
-                    new AcceptableValueRange<float>(0f, 100f)));
+                    "Experience each equipped armor piece gains from a hit by an attacker that deals your full max " +
+                    "health in damage; smaller hits give a proportional share (a hit for 25% of your health gives a " +
+                    "quarter). Damage is measured after any block but before armor, and capped at your max health. " +
+                    "Scaling by max health keeps armor leveling at a similar pace in every biome.",
+                    new AcceptableValueRange<float>(0f, 1000f)));
             ArmorShareOfBlockExperience = Config.Bind("Experience", "ArmorShareOfBlockExperience", 0.5f,
                 new ConfigDescription(
                     "Fraction of a block's experience (before the parry bonus) that each equipped armor piece also gains.",

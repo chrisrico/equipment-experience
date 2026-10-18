@@ -50,7 +50,7 @@ Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
 | Leveling   | `BaseExperience`              | 500               | Experience needed for the first forge upgrade. |
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
 | Upgrading  | `AllowPartialUpgrade`         | false             | Allow upgrading before the bar is full. |
-| Upgrading  | `PartialBaseChanceMultiplier` | 1.0               | Scales the idol's base chance used for partial upgrades. |
+| Upgrading  | `EmptyBarFailureChance`       | 0.667             | Chance a partial upgrade fails with an empty bar; falls to 0 at a full bar. |
 | General    | `NotifyWhenReady`             | true              | Show a message when an item's bar fills. |
 
 ### Balance
@@ -86,13 +86,12 @@ To level everything faster or slower, change `ExperienceRate`. To flatten or ste
 With `AllowPartialUpgrade = true`, you can try an upgrade before the bar is full:
 
 ```
-base   = idolUpgradeChance * PartialBaseChanceMultiplier
-chance = base + (1 - base) * fill        (fill = experience / required, from 0 to 1)
+failure chance = EmptyBarFailureChance * (1 - fill)      (fill = experience / required, from 0 to 1)
 ```
 
-So the chance starts at the idol's own chance (65% for every vanilla idol) with an empty bar and rises in a straight
-line to 100% with a full bar. Set `PartialBaseChanceMultiplier = 0` if you want the chance to be exactly how full the
-bar is. The roll is truly random: it is not seeded, so you can't predict or replay it.
+By default this turns vanilla's odds around. With an empty bar, an attempt fails 2/3 of the time; vanilla fails about
+1/3. The failure chance falls in a straight line to 0% at a full bar, so a half-full bar fails 1/3 of the time. The roll
+is truly random: it is not seeded, so you can't predict or replay it.
 
 A failed attempt destroys the item, the same as a failed vanilla refinement. The idol and materials are used up, and
 the game gives back 35% of the item's crafting materials.

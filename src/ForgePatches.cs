@@ -18,7 +18,7 @@ namespace EquipmentExperience
             Reason = reason;
         }
 
-        public static ForgeVerdict Evaluate(ItemDrop.ItemData item, ItemDrop.ItemData idol)
+        public static ForgeVerdict Evaluate(ItemDrop.ItemData item)
         {
             if (!Experience.IsAtMaxCraftingLevel(item))
             {
@@ -33,8 +33,8 @@ namespace EquipmentExperience
             {
                 return new ForgeVerdict(false, 0f, "Not enough experience to upgrade");
             }
-            float baseChance = Mathf.Clamp01(idol.m_shared.m_upgradeChance * Plugin.PartialBaseChanceMultiplier.Value);
-            return new ForgeVerdict(true, baseChance + (1f - baseChance) * fill, null);
+            float failureChance = Plugin.EmptyBarFailureChance.Value * (1f - fill);
+            return new ForgeVerdict(true, 1f - failureChance, null);
         }
     }
 
@@ -94,13 +94,12 @@ namespace EquipmentExperience
             {
                 return true;
             }
-            ItemDrop.ItemData idol = Experience.GetIdol(gui.m_craftRecipe);
-            if (idol == null)
+            if (Experience.GetIdol(gui.m_craftRecipe) == null)
             {
                 return true; // vanilla reports the missing requirement
             }
 
-            ForgeVerdict verdict = ForgeVerdict.Evaluate(item, idol);
+            ForgeVerdict verdict = ForgeVerdict.Evaluate(item);
             if (!verdict.Allowed)
             {
                 player.Message(MessageHud.MessageType.Center, verdict.Reason);
@@ -163,13 +162,12 @@ namespace EquipmentExperience
             {
                 return;
             }
-            ItemDrop.ItemData idol = Experience.GetIdol(recipe);
-            if (idol == null)
+            if (Experience.GetIdol(recipe) == null)
             {
                 return;
             }
 
-            ForgeVerdict verdict = ForgeVerdict.Evaluate(item, idol);
+            ForgeVerdict verdict = ForgeVerdict.Evaluate(item);
             string text;
             if (!Experience.IsAtMaxCraftingLevel(item))
             {

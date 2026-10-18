@@ -15,6 +15,7 @@ namespace WeaponExperience
                 .With(ItemExperience.RequireCore)
                 .RequireMethod(typeof(Humanoid), nameof(Humanoid.GetCurrentWeapon))
                 .RequireMethod(typeof(Humanoid), nameof(Humanoid.GetCurrentBlocker))
+                .With(ArmorExperiencePatch.RequireArmorSlots)
                 .Patch(typeof(WeaponExperiencePatch), typeof(Player), nameof(Player.RaiseSkill),
                     new[] { typeof(Skills.SkillType), typeof(float) }, HarmonyPatchType.Prefix, nameof(Prefix));
         }
@@ -40,7 +41,12 @@ namespace WeaponExperience
 
             if (skill == Skills.SkillType.Blocking)
             {
-                ItemExperience.AddExperience(player.GetCurrentBlocker(), value * Plugin.ShieldExperienceRate.Value);
+                // Vanilla raises Blocking by 1 for a block and by more (2) for a parry.
+                bool parry = value > 1f;
+                float blockXp = Plugin.ShieldExperienceRate.Value;
+                ItemExperience.AddExperience(player.GetCurrentBlocker(),
+                    parry ? blockXp * Plugin.ParryExperienceMultiplier.Value : blockXp);
+                ArmorExperiencePatch.AddToWornArmor(player, blockXp * Plugin.ArmorShareOfBlockExperience.Value);
                 return;
             }
 
@@ -52,22 +58,58 @@ namespace WeaponExperience
         }
     }
 
-    /// <summary>Armor gains experience for each hit the wearer takes from an attacker.</summary>
+    /// <summary>
+    /// Armor gains experience in proportion to the damage of each hit it takes. Vanilla calls
+    /// Player.DamageArmorDurability right after HitData.ApplyArmor for every hit on a player, so the damage is
+    /// recorded in ApplyArmor (before armor reduces it) and spent in DamageArmorDurability.
+    /// </summary>
     public static class ArmorExperiencePatch
     {
+        private static HitData _armorHit;
+        private static float _damageBeforeArmor;
+
         public static PatchGroup Group()
         {
             return new PatchGroup("Armor experience")
                 .With(ItemExperience.RequireCore)
+                .With(RequireArmorSlots)
+                .Patch(typeof(ArmorExperiencePatch), typeof(HitData), nameof(HitData.ApplyArmor),
+                    new[] { typeof(float) }, HarmonyPatchType.Prefix, nameof(ApplyArmorPrefix))
+                .Patch(typeof(ArmorExperiencePatch), typeof(Player), nameof(Player.DamageArmorDurability),
+                    new[] { typeof(HitData) }, HarmonyPatchType.Prefix, nameof(DamageArmorDurabilityPrefix));
+        }
+
+        public static PatchGroup RequireArmorSlots(PatchGroup group)
+        {
+            return group
                 .RequireField(typeof(Humanoid), nameof(Humanoid.m_helmetItem))
                 .RequireField(typeof(Humanoid), nameof(Humanoid.m_chestItem))
                 .RequireField(typeof(Humanoid), nameof(Humanoid.m_legItem))
-                .RequireField(typeof(Humanoid), nameof(Humanoid.m_shoulderItem))
-                .Patch(typeof(ArmorExperiencePatch), typeof(Player), "OnDamaged",
-                    new[] { typeof(HitData) }, HarmonyPatchType.Postfix, nameof(Postfix));
+                .RequireField(typeof(Humanoid), nameof(Humanoid.m_shoulderItem));
         }
 
-        private static void Postfix(Player __instance, HitData hit)
+        public static void AddToWornArmor(Player player, float amount)
+        {
+            ItemExperience.AddExperience(player.m_helmetItem, amount);
+            ItemExperience.AddExperience(player.m_chestItem, amount);
+            ItemExperience.AddExperience(player.m_legItem, amount);
+            ItemExperience.AddExperience(player.m_shoulderItem, amount);
+        }
+
+        private static void ApplyArmorPrefix(HitData __instance)
+        {
+            try
+            {
+                _armorHit = __instance;
+                _damageBeforeArmor = ArmorDamage(__instance);
+            }
+            catch (Exception e)
+            {
+                Guard.Report("Armor experience", e);
+            }
+        }
+
+        private static void DamageArmorDurabilityPrefix(Player __instance, HitData hit)
         {
             try
             {
@@ -76,6 +118,10 @@ namespace WeaponExperience
             catch (Exception e)
             {
                 Guard.Report("Armor experience", e);
+            }
+            finally
+            {
+                _armorHit = null;
             }
         }
 
@@ -90,12 +136,15 @@ namespace WeaponExperience
             {
                 return;
             }
+            // Falls back to the post-armor damage if a game update separates the two calls.
+            float damage = hit == _armorHit ? _damageBeforeArmor : ArmorDamage(hit);
+            AddToWornArmor(player, damage * Plugin.ArmorExperiencePerDamage.Value);
+        }
 
-            float amount = Plugin.ArmorExperienceRate.Value;
-            ItemExperience.AddExperience(player.m_helmetItem, amount);
-            ItemExperience.AddExperience(player.m_chestItem, amount);
-            ItemExperience.AddExperience(player.m_legItem, amount);
-            ItemExperience.AddExperience(player.m_shoulderItem, amount);
+        /// <summary>The damage vanilla counts against armor durability.</summary>
+        private static float ArmorDamage(HitData hit)
+        {
+            return hit.GetTotalPhysicalDamage() + hit.GetTotalElementalDamage();
         }
     }
 

@@ -9,9 +9,13 @@ player name, and a failed roll can destroy the item or take a level off it. With
   Potential can upgrade:
   - **Weapons and tools** gain experience on every hit that raises their skill. That includes melee hits, arrows and
     bolts that land, magic, and chopping or mining with an axe or pickaxe.
-  - **Shields** gain experience on every successful block, and perfect blocks count double. If you block without a
-    shield, the weapon you block with gets the experience.
-  - **Armor** pieces you are wearing gain experience every time an attacker hits you.
+  - **Shields** gain experience on every successful block. A parry (perfect block) gives 3× by default. If you block
+    without a shield, the weapon you block with gets the experience.
+  - **Armor** pieces you are wearing gain experience in two ways:
+    - **Hits from attackers:** experience scales with the hit's damage, measured before your armor reduces it.
+      Stronger armor doesn't slow its own leveling, and a hit that is partly blocked only counts the damage that got
+      through the block.
+    - **Blocks:** every block also gives each worn piece a share of the block's experience.
 - **When the bar is full, the upgrade always succeeds** if you have the right idol.
 - An item's experience shows in its tooltip. At the forge you also see the bar and the success chance.
 - Items below their maximum crafting level can't be upgraded at the Forge of Potential. Upgrade them at their normal
@@ -37,8 +41,10 @@ Config file: `BepInEx/config/chrisrico.weaponexperience.cfg`
 |------------|-------------------------------|-------------------|-------------|
 | Experience | `ExperienceRate`              | 1.0               | Global multiplier on all experience gained. |
 | Experience | `WeaponExperienceRate`        | 1.0               | Experience per point of weapon or tool skill experience earned (about 1 per hit). |
-| Experience | `ShieldExperienceRate`        | 1.0               | Experience per block (2 for a perfect block). |
-| Experience | `ArmorExperienceRate`         | 1.0               | Experience per hit taken, for each armor piece you are wearing. |
+| Experience | `ShieldExperienceRate`        | 1.0               | Experience per block, for the blocking item. |
+| Experience | `ParryExperienceMultiplier`   | 3.0               | Multiplier on the blocking item's experience for a parry. |
+| Experience | `ArmorExperiencePerDamage`    | 0.1               | Experience per point of damage in a hit from an attacker (before armor), for each worn piece. |
+| Experience | `ArmorShareOfBlockExperience` | 0.5               | Fraction of a block's experience (before the parry bonus) that each worn piece also gains. |
 | Leveling   | `BaseExperience`              | 500               | Experience needed for the first forge upgrade. |
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
 | Upgrading  | `AllowPartialUpgrade`         | false             | Allow upgrading before the bar is full. |
@@ -73,7 +79,7 @@ Most of the forge upgrade is still vanilla's own code. The mod decides whether t
 a roll that forces that outcome, so anything Iron Gate adds to the upgrade process still runs.
 
 The patches are applied in independent groups: weapon/shield experience, armor experience, the tooltip, the forge
-upgrade and the forge panel.
+upgrade, and the forge panel.
 
 - **At startup**, each group checks that every game member it uses still exists. If an update renamed one, that group
   is turned off and the BepInEx log names the missing member and the game version. The other groups keep working.

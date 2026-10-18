@@ -15,7 +15,9 @@ namespace WeaponExperience
         public static ConfigEntry<float> ExperienceRate;
         public static ConfigEntry<float> WeaponExperienceRate;
         public static ConfigEntry<float> ShieldExperienceRate;
-        public static ConfigEntry<float> ArmorExperienceRate;
+        public static ConfigEntry<float> ParryExperienceMultiplier;
+        public static ConfigEntry<float> ArmorExperiencePerDamage;
+        public static ConfigEntry<float> ArmorShareOfBlockExperience;
         public static ConfigEntry<float> BaseExperience;
         public static ConfigEntry<float> ExperienceGrowth;
         public static ConfigEntry<bool> AllowPartialUpgrade;
@@ -40,12 +42,21 @@ namespace WeaponExperience
                     new AcceptableValueRange<float>(0f, 100f)));
             ShieldExperienceRate = Config.Bind("Experience", "ShieldExperienceRate", 1f,
                 new ConfigDescription(
-                    "Experience the blocking item (shield, or weapon if no shield) gains per successful block. " +
-                    "Perfect blocks count double.",
+                    "Experience the blocking item (shield, or weapon if no shield) gains per block.",
                     new AcceptableValueRange<float>(0f, 100f)));
-            ArmorExperienceRate = Config.Bind("Experience", "ArmorExperienceRate", 1f,
-                new ConfigDescription("Experience each equipped armor piece gains whenever you take a hit from an attacker.",
+            ParryExperienceMultiplier = Config.Bind("Experience", "ParryExperienceMultiplier", 3f,
+                new ConfigDescription(
+                    "Multiplier on the blocking item's experience for a parry (perfect block).",
+                    new AcceptableValueRange<float>(1f, 100f)));
+            ArmorExperiencePerDamage = Config.Bind("Experience", "ArmorExperiencePerDamage", 0.1f,
+                new ConfigDescription(
+                    "Experience each equipped armor piece gains per point of damage in a hit from an attacker, " +
+                    "measured before your armor reduces it (after any block).",
                     new AcceptableValueRange<float>(0f, 100f)));
+            ArmorShareOfBlockExperience = Config.Bind("Experience", "ArmorShareOfBlockExperience", 0.5f,
+                new ConfigDescription(
+                    "Fraction of a block's experience (before the parry bonus) that each equipped armor piece also gains.",
+                    new AcceptableValueRange<float>(0f, 10f)));
 
             BaseExperience = Config.Bind("Leveling", "BaseExperience", 500f,
                 new ConfigDescription(

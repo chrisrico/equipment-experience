@@ -21,7 +21,7 @@ namespace EquipmentExperience
         public static ConfigEntry<float> BaseExperience;
         public static ConfigEntry<float> ExperienceGrowth;
         public static ConfigEntry<bool> AllowPartialUpgrade;
-        public static ConfigEntry<float> EmptyBarFailureChance;
+        public static ConfigEntry<float> PartialBaseChanceMultiplier;
         public static ConfigEntry<bool> NotifyWhenReady;
 
         public static ManualLogSource Log;
@@ -71,12 +71,12 @@ namespace EquipmentExperience
 
             AllowPartialUpgrade = Config.Bind("Upgrading", "AllowPartialUpgrade", false,
                 "Allow upgrading at the Forge of Potential before the experience bar is full. " +
-                "Success is then not guaranteed: the failure chance starts at EmptyBarFailureChance and falls " +
-                "linearly to 0% as the bar fills. A failed attempt destroys the item.");
-            EmptyBarFailureChance = Config.Bind("Upgrading", "EmptyBarFailureChance", 2f / 3f,
+                "Success is then not guaranteed: the chance starts at the idol's base chance and rises " +
+                "linearly to 100% as the bar fills. A failed attempt destroys the item.");
+            PartialBaseChanceMultiplier = Config.Bind("Upgrading", "PartialBaseChanceMultiplier", 1f,
                 new ConfigDescription(
-                    "Chance that a partial upgrade fails with an empty experience bar. It falls linearly to 0 at a " +
-                    "full bar. The default (2/3) inverts vanilla's odds, which succeed about 2/3 of the time.",
+                    "Scales the idol's base success chance used for partial upgrades. " +
+                    "1 = idol's normal chance at an empty bar; 0 = success chance equals how full the bar is.",
                     new AcceptableValueRange<float>(0f, 1f)));
             NotifyWhenReady = Config.Bind("General", "NotifyWhenReady", true,
                 "Show a message when an item's experience bar becomes full.");

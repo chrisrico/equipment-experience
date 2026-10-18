@@ -97,6 +97,7 @@ dotnet build -c Release                     # produces bin/Release/EquipmentExpe
 dotnet build -c Release -p:Deploy=true      # also copies it into BepInEx/plugins/EquipmentExperience
 dotnet build -c Release -p:ValheimDir=/path/to/Valheim   # if Valheim isn't in the default Steam location
 dotnet build -c Release -p:Package=true     # also writes dist/EquipmentExperience-<version>.zip for Thunderstore
+                                            # and the unzipped dist/EquipmentExperience-<version>/ folder
 ```
 
 To release a new version:

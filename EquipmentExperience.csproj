@@ -88,10 +88,11 @@
     </ItemGroup>
   </Target>
 
-  <!-- dotnet build -c Release -p:Package=true writes dist/EquipmentExperience-<version>.zip for Thunderstore upload. -->
+  <!-- dotnet build -c Release -p:Package=true writes dist/EquipmentExperience-<version>.zip for Thunderstore upload,
+       plus the same contents unzipped in dist/EquipmentExperience-<version>/ for mod managers that import folders. -->
   <Target Name="PackageThunderstore" AfterTargets="Build" Condition="'$(Package)' == 'true'">
     <PropertyGroup>
-      <PackageStage>$(BaseIntermediateOutputPath)thunderstore/</PackageStage>
+      <PackageStage>$(MSBuildProjectDirectory)/dist/$(ThunderstoreName)-$(Version)/</PackageStage>
       <PackageZip>$(MSBuildProjectDirectory)/dist/$(ThunderstoreName)-$(Version).zip</PackageZip>
     </PropertyGroup>
     <ItemGroup>

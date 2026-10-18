@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
 
-namespace WeaponExperience
+namespace EquipmentExperience
 {
     /// <summary>
     /// Experience bookkeeping for items. Experience lives in the item's m_customData, so it is saved with
     /// the character and travels with the item (chests, drops, other players).
     /// </summary>
-    public static class ItemExperience
+    public static class Experience
     {
-        public const string ExperienceKey = "WeaponExperience.XP";
+        public const string ExperienceKey = "EquipmentExperience.XP";
 
         private static readonly Dictionary<string, Recipe> ForgeRecipes = new Dictionary<string, Recipe>();
         private static ObjectDB _cachedDb;

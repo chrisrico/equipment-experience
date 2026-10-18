@@ -1,7 +1,7 @@
 using System;
 using HarmonyLib;
 
-namespace WeaponExperience
+namespace EquipmentExperience
 {
     /// <summary>
     /// Weapons, tools and shields gain experience whenever the game awards the matching skill experience,
@@ -12,7 +12,7 @@ namespace WeaponExperience
         public static PatchGroup Group()
         {
             return new PatchGroup("Weapon and shield experience")
-                .With(ItemExperience.RequireCore)
+                .With(Experience.RequireCore)
                 .RequireMethod(typeof(Humanoid), nameof(Humanoid.GetCurrentWeapon))
                 .RequireMethod(typeof(Humanoid), nameof(Humanoid.GetCurrentBlocker))
                 .With(ArmorExperiencePatch.RequireArmorSlots)
@@ -44,7 +44,7 @@ namespace WeaponExperience
                 // Vanilla raises Blocking by 1 for a block and by more (2) for a parry.
                 bool parry = value > 1f;
                 float blockXp = Plugin.ShieldExperienceRate.Value;
-                ItemExperience.AddExperience(player.GetCurrentBlocker(),
+                Experience.AddExperience(player.GetCurrentBlocker(),
                     parry ? blockXp * Plugin.ParryExperienceMultiplier.Value : blockXp);
                 ArmorExperiencePatch.AddToWornArmor(player, blockXp * Plugin.ArmorShareOfBlockExperience.Value);
                 return;
@@ -53,7 +53,7 @@ namespace WeaponExperience
             ItemDrop.ItemData weapon = player.GetCurrentWeapon();
             if (weapon != null && weapon.m_shared.m_skillType == skill)
             {
-                ItemExperience.AddExperience(weapon, value * Plugin.WeaponExperienceRate.Value);
+                Experience.AddExperience(weapon, value * Plugin.WeaponExperienceRate.Value);
             }
         }
     }
@@ -71,7 +71,7 @@ namespace WeaponExperience
         public static PatchGroup Group()
         {
             return new PatchGroup("Armor experience")
-                .With(ItemExperience.RequireCore)
+                .With(Experience.RequireCore)
                 .With(RequireArmorSlots)
                 .Patch(typeof(ArmorExperiencePatch), typeof(HitData), nameof(HitData.ApplyArmor),
                     new[] { typeof(float) }, HarmonyPatchType.Prefix, nameof(ApplyArmorPrefix))
@@ -90,10 +90,10 @@ namespace WeaponExperience
 
         public static void AddToWornArmor(Player player, float amount)
         {
-            ItemExperience.AddExperience(player.m_helmetItem, amount);
-            ItemExperience.AddExperience(player.m_chestItem, amount);
-            ItemExperience.AddExperience(player.m_legItem, amount);
-            ItemExperience.AddExperience(player.m_shoulderItem, amount);
+            Experience.AddExperience(player.m_helmetItem, amount);
+            Experience.AddExperience(player.m_chestItem, amount);
+            Experience.AddExperience(player.m_legItem, amount);
+            Experience.AddExperience(player.m_shoulderItem, amount);
         }
 
         private static void ApplyArmorPrefix(HitData __instance)
@@ -154,7 +154,7 @@ namespace WeaponExperience
         public static PatchGroup Group()
         {
             return new PatchGroup("Tooltip experience bar")
-                .With(ItemExperience.RequireCore)
+                .With(Experience.RequireCore)
                 .Patch(typeof(TooltipPatch), typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetTooltip),
                     new[] { typeof(ItemDrop.ItemData), typeof(int), typeof(bool), typeof(float), typeof(int), typeof(bool) },
                     HarmonyPatchType.Postfix, nameof(Postfix));
@@ -174,12 +174,12 @@ namespace WeaponExperience
 
         private static string Describe(ItemDrop.ItemData item, bool crafting)
         {
-            if (crafting || !ItemExperience.CanGainExperience(item))
+            if (crafting || !Experience.CanGainExperience(item))
             {
                 return "";
             }
-            string color = ItemExperience.GetFill(item) >= 1f ? "#7FFF7F" : "orange";
-            return $"\nExperience: <color={color}>{ItemExperience.FormatProgress(item)}</color>";
+            string color = Experience.GetFill(item) >= 1f ? "#7FFF7F" : "orange";
+            return $"\nExperience: <color={color}>{Experience.FormatProgress(item)}</color>";
         }
     }
 }

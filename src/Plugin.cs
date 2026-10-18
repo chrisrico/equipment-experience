@@ -3,13 +3,13 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 
-namespace WeaponExperience
+namespace EquipmentExperience
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "chrisrico.weaponexperience";
-        public const string PluginName = "Weapon Experience";
+        public const string PluginGuid = "chrisrico.equipmentexperience";
+        public const string PluginName = "Equipment Experience";
         public const string PluginVersion = PluginInfo.Version;
 
         public static ConfigEntry<float> ExperienceRate;

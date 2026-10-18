@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 
-namespace WeaponExperience
+namespace EquipmentExperience
 {
     /// <summary>
     /// A set of patches that only make sense together. Before patching, every game member the group depends on

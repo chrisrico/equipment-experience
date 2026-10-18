@@ -2,7 +2,7 @@ using System;
 using HarmonyLib;
 using UnityEngine;
 
-namespace WeaponExperience
+namespace EquipmentExperience
 {
     /// <summary>Whether an item can be upgraded at the forge right now, and with what chance.</summary>
     public readonly struct ForgeVerdict
@@ -20,11 +20,11 @@ namespace WeaponExperience
 
         public static ForgeVerdict Evaluate(ItemDrop.ItemData item, ItemDrop.ItemData idol)
         {
-            if (!ItemExperience.IsAtMaxCraftingLevel(item))
+            if (!Experience.IsAtMaxCraftingLevel(item))
             {
                 return new ForgeVerdict(false, 0f, "Reach the maximum crafting level before using the Forge of Potential");
             }
-            float fill = ItemExperience.GetFill(item);
+            float fill = Experience.GetFill(item);
             if (fill >= 1f)
             {
                 return new ForgeVerdict(true, 1f, null);
@@ -55,7 +55,7 @@ namespace WeaponExperience
         public static PatchGroup Group()
         {
             return new PatchGroup("Forge of Potential upgrades")
-                .With(ItemExperience.RequireCore)
+                .With(Experience.RequireCore)
                 .RequireField(typeof(InventoryGui), nameof(InventoryGui.m_craftRecipe))
                 .RequireField(typeof(InventoryGui), nameof(InventoryGui.m_craftUpgradeItem))
                 .RequireField(typeof(CraftingStation), nameof(CraftingStation.m_upgrader))
@@ -80,7 +80,7 @@ namespace WeaponExperience
             {
                 // Never fall back to the vanilla gamble on an error: block the upgrade instead.
                 Guard.Report("Forge upgrade", e);
-                player.Message(MessageHud.MessageType.Center, "Weapon Experience error, upgrade blocked (see BepInEx log)");
+                player.Message(MessageHud.MessageType.Center, "Equipment Experience error, upgrade blocked (see BepInEx log)");
                 return false;
             }
         }
@@ -94,7 +94,7 @@ namespace WeaponExperience
             {
                 return true;
             }
-            ItemDrop.ItemData idol = ItemExperience.GetIdol(gui.m_craftRecipe);
+            ItemDrop.ItemData idol = Experience.GetIdol(gui.m_craftRecipe);
             if (idol == null)
             {
                 return true; // vanilla reports the missing requirement
@@ -134,7 +134,7 @@ namespace WeaponExperience
         public static PatchGroup Group()
         {
             return new PatchGroup("Forge of Potential panel")
-                .With(ItemExperience.RequireCore)
+                .With(Experience.RequireCore)
                 .RequireField(typeof(InventoryGui), nameof(InventoryGui.m_selectedRecipe))
                 .RequireField(typeof(InventoryGui), nameof(InventoryGui.m_itemCraftType))
                 .RequireField(typeof(InventoryGui), nameof(InventoryGui.m_craftButton))
@@ -163,7 +163,7 @@ namespace WeaponExperience
             {
                 return;
             }
-            ItemDrop.ItemData idol = ItemExperience.GetIdol(recipe);
+            ItemDrop.ItemData idol = Experience.GetIdol(recipe);
             if (idol == null)
             {
                 return;
@@ -171,13 +171,13 @@ namespace WeaponExperience
 
             ForgeVerdict verdict = ForgeVerdict.Evaluate(item, idol);
             string text;
-            if (!ItemExperience.IsAtMaxCraftingLevel(item))
+            if (!Experience.IsAtMaxCraftingLevel(item))
             {
                 text = $"<color=orange>{verdict.Reason}</color>";
             }
             else
             {
-                text = $"Experience: {ItemExperience.FormatProgress(item)}\n";
+                text = $"Experience: {Experience.FormatProgress(item)}\n";
                 text += verdict.Allowed
                     ? $"Success chance: {Mathf.FloorToInt(verdict.Chance * 100f)}%"
                     : $"<color=orange>{verdict.Reason}</color>";

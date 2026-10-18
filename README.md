@@ -1,4 +1,4 @@
-# Weapon Experience
+# Equipment Experience
 
 A BepInEx mod for Valheim that replaces the random Forge of Potential upgrade with an experience system.
 
@@ -29,13 +29,13 @@ into a chest or to another player. An upgrade starts the new level with an empty
 - **Mod manager:** install with r2modman or Thunderstore Mod Manager. BepInExPack_Valheim is installed for you as a
   dependency.
 - **Manual:** install [BepInExPack_Valheim](https://thunderstore.io/c/valheim/p/denikson/BepInExPack_Valheim/), then
-  copy `plugins/WeaponExperience.dll` into `BepInEx/plugins/`.
+  copy `plugins/EquipmentExperience.dll` into `BepInEx/plugins/`.
 
 The mod is client-side. You don't need it on the server, and other players don't need it.
 
 ## Configuration
 
-Config file: `BepInEx/config/chrisrico.weaponexperience.cfg`
+Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
 
 | Section    | Key                           | Default           | Description |
 |------------|-------------------------------|-------------------|-------------|
@@ -93,14 +93,14 @@ upgrade, and the forge panel.
 You need the .NET SDK (6 or later) and a Valheim install with BepInEx.
 
 ```sh
-dotnet build -c Release                     # produces bin/Release/WeaponExperience.dll
-dotnet build -c Release -p:Deploy=true      # also copies it into BepInEx/plugins/WeaponExperience
+dotnet build -c Release                     # produces bin/Release/EquipmentExperience.dll
+dotnet build -c Release -p:Deploy=true      # also copies it into BepInEx/plugins/EquipmentExperience
 dotnet build -c Release -p:ValheimDir=/path/to/Valheim   # if Valheim isn't in the default Steam location
-dotnet build -c Release -p:Package=true     # also writes dist/WeaponExperience-<version>.zip for Thunderstore
+dotnet build -c Release -p:Package=true     # also writes dist/EquipmentExperience-<version>.zip for Thunderstore
 ```
 
 To release a new version:
-1. Update `<Version>` in `WeaponExperience.csproj`. The plugin version and the Thunderstore manifest both read it from
+1. Update `<Version>` in `EquipmentExperience.csproj`. The plugin version and the Thunderstore manifest both read it from
    there.
 2. Add an entry to `CHANGELOG.md`.
 3. Upload the zip.

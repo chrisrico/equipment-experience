@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>WeaponExperience</AssemblyName>
-    <RootNamespace>WeaponExperience</RootNamespace>
+    <AssemblyName>EquipmentExperience</AssemblyName>
+    <RootNamespace>EquipmentExperience</RootNamespace>
     <LangVersion>latest</LangVersion>
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -17,7 +17,7 @@
 
   <!-- Thunderstore package metadata. Version and Description above are reused for the manifest. -->
   <PropertyGroup>
-    <ThunderstoreName>WeaponExperience</ThunderstoreName>
+    <ThunderstoreName>EquipmentExperience</ThunderstoreName>
     <ThunderstoreWebsite>https://github.com/chrisrico/weapon-experience</ThunderstoreWebsite>
     <ThunderstoreDependencies>&quot;denikson-BepInExPack_Valheim-5.4.2351&quot;</ThunderstoreDependencies>
   </PropertyGroup>
@@ -81,14 +81,14 @@
       <PluginInfoFile>$(IntermediateOutputPath)PluginInfo.g.cs</PluginInfoFile>
     </PropertyGroup>
     <WriteLinesToFile File="$(PluginInfoFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
-                      Lines="namespace WeaponExperience { internal static class PluginInfo { public const string Version = &quot;$(Version)&quot;%3B } }" />
+                      Lines="namespace EquipmentExperience { internal static class PluginInfo { public const string Version = &quot;$(Version)&quot;%3B } }" />
     <ItemGroup>
       <Compile Include="$(PluginInfoFile)" />
       <FileWrites Include="$(PluginInfoFile)" />
     </ItemGroup>
   </Target>
 
-  <!-- dotnet build -c Release -p:Package=true writes dist/WeaponExperience-<version>.zip for Thunderstore upload. -->
+  <!-- dotnet build -c Release -p:Package=true writes dist/EquipmentExperience-<version>.zip for Thunderstore upload. -->
   <Target Name="PackageThunderstore" AfterTargets="Build" Condition="'$(Package)' == 'true'">
     <PropertyGroup>
       <PackageStage>$(BaseIntermediateOutputPath)thunderstore/</PackageStage>
@@ -114,8 +114,8 @@
 
   <!-- dotnet build -p:Deploy=true copies the plugin into the local BepInEx plugins folder. -->
   <Target Name="DeployToBepInEx" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">
-    <MakeDir Directories="$(BepInExDir)/plugins/WeaponExperience" />
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)/plugins/WeaponExperience" />
+    <MakeDir Directories="$(BepInExDir)/plugins/EquipmentExperience" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(BepInExDir)/plugins/EquipmentExperience" />
   </Target>
 
 </Project>

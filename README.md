@@ -51,6 +51,9 @@ Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
 | Leveling   | `BaseExperience`              | 500               | Experience needed for the first forge upgrade. |
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
 | Guardians  | `SpawnGuardians`              | true              | Summon guardians whenever an item is refined. |
+| Guardians  | `ForgeLevelsPerStar`          | 1                 | Forge levels per extra guardian star, up to 2 stars. |
+| Guardians  | `ForgeLevelsPerExtraGuardian` | 2                 | After stars max out, forge levels per extra copy of each guardian entry. |
+| Guardians  | `MaxExtraGuardians`           | 3                 | Most extra copies per guardian entry. |
 | Guardians  | `Tier0Wooden` … `Tier7Bloodgold` | see below      | Which guardians each idol tier summons. |
 | General    | `NotifyWhenReady`             | true              | Show a message when an item's bar fills. |
 
@@ -101,9 +104,22 @@ Which guardians appear depends on the idol's tier:
 | Flametal | Ashlands | Fallen Valkyrie, Charred warrior |
 | Bloodgold | Deep North | Jotun warrior, Jotun witch |
 
-Guardians get tougher as the item does: +1 star at forge levels +3 and +4, and +2 stars from +5. Each tier's setting
-is a comma-separated list of `Prefab:count` or `Prefab:count:stars` entries, using the game's prefab names (the same
-names the `spawn` console command takes). Keep each tier to one faction, because creatures from different factions
+Guardians get tougher as the item does. They gain stars first, then numbers:
+
+| Forge level | Stars | Extra copies of each entry | Example: Black Metal idol |
+|---|---|---|---|
+| +1 | 0 | 0 | 1 Fuling berserker, 2 Fulings |
+| +2 | 1 | 0 | same, 1★ |
+| +3 | 2 | 0 | same, 2★ |
+| +4, +5 | 2 | 1 | 2 berserkers, 3 Fulings, 2★ |
+| +6, +7 | 2 | 2 | 3 berserkers, 4 Fulings, 2★ |
+| +8 and up | 2 | 3 (the cap) | 4 berserkers, 5 Fulings, 2★ |
+
+A star adds one level to a creature: its health rises by its base amount, its damage by 50%, and its loot doubles.
+Stars stop at 2, because loot keeps doubling with each level; after that, difficulty comes from numbers instead.
+
+Each tier's setting is a comma-separated list of `Prefab:count` or `Prefab:count:stars` entries, giving the guardians at
++1. They use the game's prefab names, the same names the `spawn` console command takes. Keep each tier to one faction, because creatures from different factions
 fight each other instead of you.
 
 ### Multiplayer

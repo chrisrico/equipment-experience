@@ -39,6 +39,9 @@ namespace EquipmentExperience
         private const float MaxSpawnHeightDifference = 4f;
 
         public static ConfigEntry<bool> Enabled;
+        private static ConfigEntry<int> _forgeLevelsPerStar;
+        private static ConfigEntry<int> _forgeLevelsPerExtraGuardian;
+        private static ConfigEntry<int> _maxExtraGuardians;
         private static ConfigEntry<string>[] _tierGuardians;
         private static bool _available;
 
@@ -46,14 +49,25 @@ namespace EquipmentExperience
         {
             Enabled = config.Bind("Guardians", "SpawnGuardians", true,
                 "Summon guardians at the Forge of Potential whenever an item is refined.");
+            _forgeLevelsPerStar = config.Bind("Guardians", "ForgeLevelsPerStar", 1,
+                new ConfigDescription(
+                    $"Guardians gain a star every this many forge levels past +1, up to {MaxStars} stars.",
+                    new AcceptableValueRange<int>(1, 20)));
+            _forgeLevelsPerExtraGuardian = config.Bind("Guardians", "ForgeLevelsPerExtraGuardian", 2,
+                new ConfigDescription(
+                    "Once guardians have the maximum stars, every this many further forge levels adds one more " +
+                    "copy of each guardian entry (starting with the first level after the stars max out).",
+                    new AcceptableValueRange<int>(1, 20)));
+            _maxExtraGuardians = config.Bind("Guardians", "MaxExtraGuardians", 3,
+                new ConfigDescription("Most extra copies added to each guardian entry by forge level.",
+                    new AcceptableValueRange<int>(0, 10)));
             _tierGuardians = new ConfigEntry<string>[TierNames.Length];
             for (int tier = 0; tier < TierNames.Length; tier++)
             {
                 _tierGuardians[tier] = config.Bind("Guardians", $"Tier{tier}{TierNames[tier]}", DefaultGuardians[tier],
                     $"Guardians summoned when refining with a {TierNames[tier]} idol. Comma-separated " +
-                    "Prefab:count or Prefab:count:stars entries. Stars rise by one for every two forge levels " +
-                    $"past +1, up to {MaxStars}. Creatures from different factions fight each other, so keep each " +
-                    "tier to one faction.");
+                    "Prefab:count or Prefab:count:stars entries; stars and count are the base values at forge " +
+                    "level +1. Creatures from different factions fight each other, so keep each tier to one faction.");
             }
         }
 
@@ -118,7 +132,7 @@ namespace EquipmentExperience
             {
                 return;
             }
-            int bonusStars = Math.Max(0, forgeLevel - 1) / 2;
+            (int bonusStars, int extraCopies) = Scaling(forgeLevel);
             int spawned = 0;
             foreach ((string prefabName, int count, int stars) in Parse(_tierGuardians[tier].Value))
             {
@@ -128,7 +142,7 @@ namespace EquipmentExperience
                     Plugin.Log.LogWarning($"Forge guardians: '{prefabName}' is not a creature prefab, skipping.");
                     continue;
                 }
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < count + extraCopies; i++)
                 {
                     Vector3 position = FindSpawnPosition(forgePosition, player.transform.position);
                     Vector3 toPlayer = Vector3.ProjectOnPlane(player.transform.position - position, Vector3.up);
@@ -148,6 +162,25 @@ namespace EquipmentExperience
             {
                 player.Message(MessageHud.MessageType.Center, "The forge's guardians awaken!");
             }
+        }
+
+        /// <summary>
+        /// Difficulty for a forge level: stars rise first, then each entry gains extra copies. With the defaults,
+        /// +1: 0 stars, +2: 1 star, +3: 2 stars, +4/+5: one extra copy, +6/+7: two, +8 and up: three.
+        /// </summary>
+        public static (int BonusStars, int ExtraCopies) Scaling(int forgeLevel)
+        {
+            int levelsPerStar = Math.Max(1, _forgeLevelsPerStar.Value);
+            int levelsPastFirst = Math.Max(0, forgeLevel - 1);
+            int bonusStars = Math.Min(MaxStars, levelsPastFirst / levelsPerStar);
+            int levelsPastMaxStars = levelsPastFirst - MaxStars * levelsPerStar;
+            if (levelsPastMaxStars <= 0)
+            {
+                return (bonusStars, 0);
+            }
+            int levelsPerExtra = Math.Max(1, _forgeLevelsPerExtraGuardian.Value);
+            int extra = (levelsPastMaxStars + levelsPerExtra - 1) / levelsPerExtra;
+            return (bonusStars, Math.Min(_maxExtraGuardians.Value, extra));
         }
 
         private static IEnumerable<(string Prefab, int Count, int Stars)> Parse(string spec)

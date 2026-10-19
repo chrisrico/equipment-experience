@@ -52,8 +52,8 @@ Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
 | Experience | `ParryExperienceMultiplier`   | 2.0               | Multiplier on the blocking item's experience for a parry. |
 | Experience | `ArmorExperiencePerMaxHealth` | 12                | Experience for each worn piece from a hit equal to your max health (smaller hits give a proportional share). |
 | Experience | `ArmorShareOfBlockExperience` | 0.5               | Fraction of a block's experience (before the parry bonus) that each worn piece also gains. |
-| Tiers      | `LowerTierMultiplier`         | 0.9               | Multiplier per biome the enemy is below the item's tier. |
-| Tiers      | `HigherTierMultiplier`        | 1.1               | Multiplier per biome the enemy is above the item's tier. |
+| Tiers      | `LowerTierMultiplier`         | 0.8               | Multiplier per biome the enemy is below the item's tier. |
+| Tiers      | `HigherTierMultiplier`        | 1.2               | Multiplier per biome the enemy is above the item's tier. |
 | Tiers      | `EnemyTierOverrides`          | `Surtling:2, GoblinDeepNorth:7` | `Prefab:tier` exceptions to the enemy tier rules. |
 | Leveling   | `BaseExperience`              | 500               | Experience needed for the first forge upgrade. |
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
@@ -100,11 +100,11 @@ the item, or by `HigherTierMultiplier` for each tier above. Fighting at your gea
 
 | A Plains (tier 4) weapon fighting… | Multiplier |
 |---|---|
-| Meadows enemies | 0.9⁴ ≈ 0.66 |
-| Swamp enemies | 0.9² = 0.81 |
+| Meadows enemies | 0.8⁴ ≈ 0.41 |
+| Swamp enemies | 0.8² = 0.64 |
 | Plains enemies | 1 |
-| Mistlands enemies | 1.1 |
-| Ashlands enemies | 1.1² = 1.21 |
+| Mistlands enemies | 1.2 |
+| Ashlands enemies | 1.2² = 1.44 |
 
 - **An item's tier** is the tier of the idol that refines it. Wooden idols are tier 0 and Bloodgold idols are tier 7.
 - **An enemy's tier**, checked in this order:

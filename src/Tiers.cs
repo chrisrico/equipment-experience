@@ -48,12 +48,12 @@ namespace EquipmentExperience
 
         public static void BindConfig(ConfigFile config)
         {
-            _lowerTierMultiplier = config.Bind("Tiers", "LowerTierMultiplier", 0.9f,
+            _lowerTierMultiplier = config.Bind("Tiers", "LowerTierMultiplier", 0.8f,
                 new ConfigDescription(
                     "Experience multiplier for each biome the enemy is below the item's tier " +
-                    "(0.9 = a Plains weapon earns 0.9^4 = 66% against Meadows enemies).",
+                    "(0.8 = a Plains weapon earns 0.8^4 = 41% against Meadows enemies).",
                     new AcceptableValueRange<float>(0f, 1f)));
-            _higherTierMultiplier = config.Bind("Tiers", "HigherTierMultiplier", 1.1f,
+            _higherTierMultiplier = config.Bind("Tiers", "HigherTierMultiplier", 1.2f,
                 new ConfigDescription(
                     "Experience multiplier for each biome the enemy is above the item's tier.",
                     new AcceptableValueRange<float>(1f, 3f)));

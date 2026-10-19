@@ -1,0 +1,14 @@
+# Upload settings for tools/release.sh (dotnet tcli publish --file). The package itself, including its manifest and
+# version, is built by EquipmentExperience.csproj; tcli only uses the team, communities and categories below.
+[config]
+schemaVersion = "0.0.1"
+
+[package]
+namespace = "Nerdtastic"
+name = "EquipmentExperience"
+
+[publish]
+repository = "https://thunderstore.io"
+communities = [ "valheim", ]
+[publish.categories]
+valheim = [ "crafting", "gear", "client-side", "deep-north-update", ]

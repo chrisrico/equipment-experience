@@ -30,10 +30,29 @@ If you add a patch group, add it to `PatchGroups.All()` in `src/Plugin.cs` as we
 
 ## Releasing
 
+Every upload needs a new version: Thunderstore rejects a version it already has, and mod managers only offer an
+update when the number goes up.
+
 1. Update `<Version>` in `EquipmentExperience.csproj`. The plugin version and the Thunderstore manifest both read it
    from there.
-2. Add an entry to `CHANGELOG.md`.
-3. Build with `-p:Package=true`, test the folder in a mod manager, then upload the zip to Thunderstore.
+2. Add a `## <version>` entry to `CHANGELOG.md`.
+3. Build with `-p:Package=true` and test the folder in a mod manager.
+4. Commit, push `main`, then run `tools/release.sh`.
+
+The script refuses to run unless `main` is clean and pushed, the version has a changelog entry, and neither a
+`v<version>` tag nor that version on Thunderstore already exists. It runs the game API check, builds the package and
+asks before uploading it with `tcli` (Thunderstore's CLI, installed by `dotnet tool restore`). The upload uses the team
+and categories in `thunderstore.toml`. Only after a successful upload does it tag the commit `v<version>` and push the
+tag.
+
+The upload needs a Thunderstore service account token. Create one under the Nerdtastic team's settings on
+thunderstore.io and store it in the keychain:
+
+```sh
+security add-generic-password -a "$USER" -s thunderstore-token -w   # prompts for the token
+```
+
+Setting `TCLI_AUTH_TOKEN` instead also works.
 
 ## Testing in the game
 

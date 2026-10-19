@@ -37,9 +37,12 @@ If you add a patch group, add it to `PatchGroups.All()` in `src/Plugin.cs` as we
 
 ## Testing in the game
 
-Set `BaseExperience = 5` in the config so bars fill in a few hits, then turn on `devcommands` in the console:
+Use a throwaway test world. Set `BaseExperience = 5` in the config so bars fill in a few hits, then turn on
+`devcommands` in the console:
 
-- `location AncientUpgradeStation` spawns a Forge of Potential next to you.
+- `location AncientUpgradeStation SAVE` spawns a Forge of Potential in front of you. Without `SAVE`, the game turns off
+  saving for that world permanently. With it, the forge stays in the world for good. Either way, don't do this in a
+  world you care about.
 - `spawn Upgrader4Weapon` (or `Upgrader{0-7}{Weapon|Armor}`) gives you an idol.
 - Refine one item several times to see guardian stars, then extra copies.
 - Upgrade an item that has experience at a workbench, and check that the experience survives.

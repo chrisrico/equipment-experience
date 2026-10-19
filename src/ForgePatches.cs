@@ -183,7 +183,7 @@ namespace EquipmentExperience
             {
                 text = $"Experience: {Experience.FormatProgress(item)}\n";
                 text += verdict.Allowed
-                    ? Guardians.Enabled.Value ? "Ready. <color=orange>Refining will awaken the forge's guardians.</color>" : "Ready."
+                    ? Guardians.WillSpawn ? "Ready. <color=orange>Refining will awaken the forge's guardians.</color>" : "Ready."
                     : $"<color=orange>{verdict.Reason}</color>";
             }
             gui.m_itemCraftType.gameObject.SetActive(true);

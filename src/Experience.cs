@@ -15,6 +15,7 @@ namespace EquipmentExperience
 
         private static readonly Dictionary<string, Recipe> ForgeRecipes = new Dictionary<string, Recipe>();
         private static ObjectDB _cachedDb;
+        private static int _cachedRecipeCount;
 
         /// <summary>Game members everything in this class relies on, for <see cref="PatchGroup"/> startup checks.</summary>
         public static PatchGroup RequireCore(PatchGroup group)
@@ -34,10 +35,13 @@ namespace EquipmentExperience
             {
                 return null;
             }
-            if (db != _cachedDb)
+            // Other mods may add recipes after the first lookup, so a change in the recipe list resets the cache,
+            // including any "no forge recipe" results.
+            if (db != _cachedDb || db.m_recipes.Count != _cachedRecipeCount)
             {
                 ForgeRecipes.Clear();
                 _cachedDb = db;
+                _cachedRecipeCount = db.m_recipes.Count;
             }
             string name = item.m_shared.m_name;
             if (!ForgeRecipes.TryGetValue(name, out Recipe found))

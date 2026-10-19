@@ -38,7 +38,6 @@ namespace EquipmentExperience
         private static ConfigEntry<string> _enemyTierOverrides;
         private static string _parsedOverridesSource;
         private static Dictionary<string, int> _parsedOverrides = new Dictionary<string, int>();
-        private static readonly Dictionary<string, int> ItemTiers = new Dictionary<string, int>();
         private static bool _available;
 
         // The highest-tier enemy the local player damaged or blocked this frame; vanilla raises the matching skill
@@ -109,14 +108,8 @@ namespace EquipmentExperience
 
         public static int ItemTier(ItemDrop.ItemData item)
         {
-            string name = item.m_shared.m_name;
-            if (!ItemTiers.TryGetValue(name, out int tier))
-            {
-                Recipe recipe = Experience.GetForgeRecipe(item);
-                tier = recipe != null ? IdolTier(recipe) : Unknown;
-                ItemTiers[name] = tier;
-            }
-            return tier;
+            Recipe recipe = Experience.GetForgeRecipe(item);
+            return recipe != null ? IdolTier(recipe) : Unknown;
         }
 
         public static int EnemyTier(Character enemy)

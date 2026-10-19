@@ -85,9 +85,12 @@ namespace EquipmentExperience
             _available = available;
         }
 
+        /// <summary>Whether refining will summon guardians: enabled in the config and its startup check passed.</summary>
+        public static bool WillSpawn => _available && Enabled.Value;
+
         public static void Summon(int tier, int forgeLevel, Vector3 forgePosition)
         {
-            if (!_available || !Enabled.Value || tier < 0 || tier >= _tierGuardians.Length)
+            if (!WillSpawn || tier < 0 || tier >= _tierGuardians.Length)
             {
                 return;
             }

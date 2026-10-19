@@ -40,9 +40,9 @@ namespace EquipmentExperience
                 return;
             }
 
-            int enemyTier = Tiers.TakeTargetTier(player.transform.position);
             if (skill == Skills.SkillType.Blocking)
             {
+                int enemyTier = Tiers.TakeTargetTier(player.transform.position);
                 // Vanilla raises Blocking by 1 for a block and by more (2) for a parry.
                 bool parry = value > 1f;
                 float blockXp = Plugin.ShieldExperienceRate.Value;
@@ -55,6 +55,7 @@ namespace EquipmentExperience
             ItemDrop.ItemData weapon = player.GetCurrentWeapon();
             if (weapon != null && weapon.m_shared.m_skillType == skill)
             {
+                int enemyTier = Tiers.TakeTargetTier(player.transform.position);
                 Experience.AddExperience(weapon, value * Plugin.WeaponExperienceRate.Value, enemyTier);
             }
         }

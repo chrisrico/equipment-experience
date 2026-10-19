@@ -10,7 +10,7 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Version>1.0.0</Version>
-    <Description>Replaces the random Forge of Potential idol upgrades with item experience. Max-level weapons, tools, shields and armor gain experience as you use them, and a full bar guarantees the upgrade.</Description>
+    <Description>Replaces the random Forge of Potential gamble with experience. Weapons, tools, shields and armor level up as you use them, a full bar guarantees the upgrade, and every refinement awakens guardians to fight.</Description>
     <!-- Unity ships older System.* facades than netstandard2.1; the conflicts are harmless. -->
     <NoWarn>$(NoWarn);MSB3277</NoWarn>
   </PropertyGroup>
@@ -31,6 +31,11 @@
     <ManagedDir Condition="'$(ManagedDir)' == ''">$(ValheimDir)/valheim_Data/Managed</ManagedDir>
     <BepInExDir>$(ValheimDir)/BepInEx</BepInExDir>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- tools/ holds separate projects (see DEVELOPMENT.md). -->
+    <Compile Remove="tools/**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
@@ -105,7 +110,7 @@
       <ManifestLine Include="}" />
     </ItemGroup>
     <RemoveDir Directories="$(PackageStage)" />
-    <Copy SourceFiles="README.md;CHANGELOG.md;thunderstore/icon.png" DestinationFolder="$(PackageStage)" />
+    <Copy SourceFiles="README.md;CHANGELOG.md;LICENSE;thunderstore/icon.png" DestinationFolder="$(PackageStage)" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PackageStage)plugins" />
     <WriteLinesToFile File="$(PackageStage)manifest.json" Lines="@(ManifestLine)" Overwrite="true" />
     <MakeDir Directories="$(MSBuildProjectDirectory)/dist" />

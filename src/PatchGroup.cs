@@ -22,6 +22,11 @@ namespace EquipmentExperience
             _name = name;
         }
 
+        public string Name => _name;
+
+        /// <summary>Game members (or patch parameters) this group needs that the running game doesn't have.</summary>
+        public IReadOnlyList<string> Missing => _missing;
+
         public PatchGroup With(Func<PatchGroup, PatchGroup> requirements)
         {
             return requirements(this);
@@ -55,6 +60,17 @@ namespace EquipmentExperience
             }
             MethodInfo patch = AccessTools.Method(patchClass, patchMethod)
                                ?? throw new MissingMethodException(patchClass.Name, patchMethod);
+            // Harmony passes the original's arguments to patch parameters by name, so a renamed parameter in a game
+            // update would make patching throw. Special parameters (__instance, __result, ...) start with "__".
+            ParameterInfo[] originalParameters = original.GetParameters();
+            foreach (ParameterInfo parameter in patch.GetParameters())
+            {
+                if (!parameter.Name.StartsWith("__", StringComparison.Ordinal)
+                    && Array.TrueForAll(originalParameters, p => p.Name != parameter.Name))
+                {
+                    _missing.Add($"parameter '{parameter.Name}' of {type.Name}.{method}");
+                }
+            }
             _patches.Add((original, patch, kind));
             return this;
         }

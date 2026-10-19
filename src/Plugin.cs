@@ -99,4 +99,23 @@ namespace EquipmentExperience
             _harmony?.UnpatchSelf();
         }
     }
+
+    /// <summary>Every patch group and requirement check, for tools/GameApiCheck. Keep in sync with Plugin.Awake.</summary>
+    public static class PatchGroups
+    {
+        public static PatchGroup[] All()
+        {
+            return new[]
+            {
+                Tiers.Group(),
+                CraftingUpgradeCarryOverPatch.Group(),
+                WeaponExperiencePatch.Group(),
+                ArmorExperiencePatch.Group(),
+                TooltipPatch.Group(),
+                ForgeUpgradePatch.Group(),
+                ForgePanelPatch.Group(),
+                Guardians.Requirements(),
+            };
+        }
+    }
 }

@@ -161,38 +161,13 @@ The config is not synced from the server. Each player's own settings apply to th
 the item itself, so an item keeps its experience when you give it to a player who doesn't have the mod. It only gains
 more experience, or upgrades through experience, for players who have the mod.
 
-## Compatibility with game updates
+## After a game update
 
-Most of the forge upgrade is still vanilla's own code. The mod decides whether the upgrade succeeds, then hands vanilla
-a roll that forces that outcome, so anything Iron Gate adds to the upgrade process still runs.
+If a Valheim update breaks part of the mod, that part switches itself off and the rest keeps working. The BepInEx log
+(`BepInEx/LogOutput.log`) names the part and the reason. Experience you've already earned is stored on your items and
+isn't affected. The forge upgrade is the one exception: if it can't load, the forge goes back to the vanilla gamble,
+and the log says so.
 
-The patches are applied in independent groups: weapon/shield experience, armor experience, the tooltip, the forge
-upgrade, the forge panel, experience carry-over on workbench upgrades, and enemy tier tracking. If tier tracking
-fails, every tier multiplier is 1 and experience otherwise works as before. The guardians have their own startup check.
-If it fails, upgrades still work, just without guardians. If the carry-over group fails, items only gain experience at
-max crafting level, so a workbench upgrade can never wipe banked experience.
+## Source and license
 
-- **At startup**, each group checks that every game member it uses still exists. If an update renamed one, that group
-  is turned off and the BepInEx log names the missing member and the game version. The other groups keep working.
-- **If the forge upgrade group can't load**, the forge panel is turned off as well, so it can't promise a guaranteed
-  upgrade. The log then says the vanilla random mechanic is active.
-- **If a patch throws an error while the game is running**, the error is logged once and the game carries on. If the
-  forge upgrade patch fails, the upgrade is blocked rather than handed back to the vanilla gamble.
-
-## Building
-
-You need the .NET SDK (6 or later) and a Valheim install with BepInEx.
-
-```sh
-dotnet build -c Release                     # produces bin/Release/EquipmentExperience.dll
-dotnet build -c Release -p:Deploy=true      # also copies it into BepInEx/plugins/EquipmentExperience
-dotnet build -c Release -p:ValheimDir=/path/to/Valheim   # if Valheim isn't in the default Steam location
-dotnet build -c Release -p:Package=true     # also writes dist/EquipmentExperience-<version>.zip for Thunderstore
-                                            # and the unzipped dist/EquipmentExperience-<version>/ folder
-```
-
-To release a new version:
-1. Update `<Version>` in `EquipmentExperience.csproj`. The plugin version and the Thunderstore manifest both read it from
-   there.
-2. Add an entry to `CHANGELOG.md`.
-3. Upload the zip.
+Source code and issue tracker: https://github.com/chrisrico/equipment-experience. Released under the MIT license.

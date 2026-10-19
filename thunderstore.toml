@@ -11,4 +11,4 @@ name = "EquipmentExperience"
 repository = "https://thunderstore.io"
 communities = [ "valheim", ]
 [publish.categories]
-valheim = [ "crafting", "gear", "client-side", "deep-north-update", ]
+valheim = [ "crafting", "gear", "client-side", "deep-north-update", "ai-generated", ]

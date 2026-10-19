@@ -18,6 +18,8 @@ the target level and your player name. With this mod:
       is measured before your armor reduces it, so stronger armor doesn't slow its own leveling. A hit that is partly
       blocked only counts the damage that got through the block.
     - **Blocks:** every block also gives each worn piece a share of the block's experience.
+- **Experience depends on what you fight.** Enemies from a biome below the item's tier give less, and enemies from
+  a biome above it give more, so farming easy targets is slow.
 - **An upgrade needs a full bar, and then it always succeeds** if you have the right idol.
 - **Every upgrade awakens the forge's guardians.** Creatures from the idol's biome spawn around the forge and attack.
 - An item's experience shows in its tooltip. At the forge you also see the bar and the success chance.
@@ -50,6 +52,9 @@ Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
 | Experience | `ParryExperienceMultiplier`   | 2.0               | Multiplier on the blocking item's experience for a parry. |
 | Experience | `ArmorExperiencePerMaxHealth` | 12                | Experience for each worn piece from a hit equal to your max health (smaller hits give a proportional share). |
 | Experience | `ArmorShareOfBlockExperience` | 0.5               | Fraction of a block's experience (before the parry bonus) that each worn piece also gains. |
+| Tiers      | `LowerTierMultiplier`         | 0.9               | Multiplier per biome the enemy is below the item's tier. |
+| Tiers      | `HigherTierMultiplier`        | 1.1               | Multiplier per biome the enemy is above the item's tier. |
+| Tiers      | `EnemyTierOverrides`          | `Surtling:2, GoblinDeepNorth:7` | `Prefab:tier` exceptions to the enemy tier rules. |
 | Leveling   | `BaseExperience`              | 500               | Experience needed for the first forge upgrade. |
 | Leveling   | `ExperienceGrowth`            | 1.5               | Multiplier on the required experience for each further forge level. |
 | Guardians  | `SpawnGuardians`              | true              | Summon guardians whenever an item is refined. |
@@ -87,6 +92,32 @@ harder to reach:
 To level everything faster or slower, change `ExperienceRate`. To flatten or steepen the curve, change
 `ExperienceGrowth`.
 
+### Tiers
+
+Items and enemies each have a biome tier: 0 Meadows, 1 Black Forest, 2 Swamp, 3 Mountains, 4 Plains, 5 Mistlands,
+6 Ashlands, 7 Deep North. Every experience award is multiplied by `LowerTierMultiplier` for each tier the enemy is below
+the item, or by `HigherTierMultiplier` for each tier above. Fighting at your gear's tier is unchanged.
+
+| A Plains (tier 4) weapon fighting… | Multiplier |
+|---|---|
+| Meadows enemies | 0.9⁴ ≈ 0.66 |
+| Swamp enemies | 0.9² = 0.81 |
+| Plains enemies | 1 |
+| Mistlands enemies | 1.1 |
+| Ashlands enemies | 1.1² = 1.21 |
+
+- **An item's tier** is the tier of the idol that refines it. Wooden idols are tier 0 and Bloodgold idols are tier 7.
+- **An enemy's tier**, checked in this order:
+  1. `EnemyTierOverrides`, if it lists the creature.
+  2. Its faction, if that faction lives in only one biome: Mountains, Plains, Mistlands, Ashlands (Demon) or Deep North.
+     A Fuling raid on a Meadows base still counts as a Plains fight.
+  3. Otherwise, the biome the enemy is standing in. Greydwarfs, the undead, animals, bosses and Dvergr appear in several
+     biomes, so their location decides. This also covers creatures added by other mods, with no list to maintain.
+- **Hits on trees and rocks** use the biome you're standing in.
+- **Blocks** use the attacker's tier. **Armor hits** also use the attacker's tier, and each piece compares it with its
+  own tier.
+- **Unknown cases count as 1×:** the ocean, a biome the mod doesn't recognise, or a non-vanilla idol.
+
 ### Guardians
 
 Each refinement awakens the forge's guardians about two seconds after the upgrade finishes. They spawn 6–10 m from the
@@ -121,8 +152,8 @@ A star adds one level to a creature: its health rises by its base amount, its da
 Stars stop at 2, because loot keeps doubling with each level; after that, difficulty comes from numbers instead.
 
 Each tier's setting is a comma-separated list of `Prefab:count` or `Prefab:count:stars` entries, giving the guardians at
-+1. They use the game's prefab names, the same names the `spawn` console command takes. Keep each tier to one faction, because creatures from different factions
-fight each other instead of you.
++1. They use the game's prefab names, the same names the `spawn` console command takes. Keep each tier to one faction,
+because creatures from different factions fight each other instead of you.
 
 ### Multiplayer
 
@@ -136,7 +167,8 @@ Most of the forge upgrade is still vanilla's own code. The mod decides whether t
 a roll that forces that outcome, so anything Iron Gate adds to the upgrade process still runs.
 
 The patches are applied in independent groups: weapon/shield experience, armor experience, the tooltip, the forge
-upgrade, the forge panel, and experience carry-over on workbench upgrades. The guardians have their own startup check.
+upgrade, the forge panel, experience carry-over on workbench upgrades, and enemy tier tracking. If tier tracking
+fails, every tier multiplier is 1 and experience otherwise works as before. The guardians have their own startup check.
 If it fails, upgrades still work, just without guardians. If the carry-over group fails, items only gain experience at
 max crafting level, so a workbench upgrade can never wipe banked experience.
 

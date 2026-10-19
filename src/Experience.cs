@@ -121,13 +121,14 @@ namespace EquipmentExperience
             return Mathf.Clamp01(GetExperience(item) / GetRequired(item));
         }
 
-        public static void AddExperience(ItemDrop.ItemData item, float amount)
+        /// <summary>Adds experience earned against an enemy of the given tier (or <see cref="Tiers.Unknown"/>).</summary>
+        public static void AddExperience(ItemDrop.ItemData item, float amount, int enemyTier)
         {
-            amount *= Plugin.ExperienceRate.Value;
             if (amount <= 0f || !CanGainExperience(item))
             {
                 return;
             }
+            amount *= Plugin.ExperienceRate.Value * Tiers.Multiplier(item, enemyTier);
             float required = GetRequired(item);
             float before = GetExperience(item);
             if (before >= required)

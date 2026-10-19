@@ -72,8 +72,11 @@ namespace EquipmentExperience
             NotifyWhenReady = Config.Bind("General", "NotifyWhenReady", true,
                 "Show a message when an item's experience bar becomes full.");
             Guardians.BindConfig(Config);
+            Tiers.BindConfig(Config);
 
             _harmony = new Harmony(PluginGuid);
+            // Without tier tracking every tier multiplier is 1, so experience still works.
+            Tiers.SetAvailable(Tiers.Group().Apply(_harmony));
             // Experience before max level only if it survives workbench upgrades.
             Experience.GainBeforeMaxLevel = CraftingUpgradeCarryOverPatch.Group().Apply(_harmony);
             WeaponExperiencePatch.Group().Apply(_harmony);

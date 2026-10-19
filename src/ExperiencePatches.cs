@@ -40,21 +40,22 @@ namespace EquipmentExperience
                 return;
             }
 
+            int enemyTier = Tiers.TakeTargetTier(player.transform.position);
             if (skill == Skills.SkillType.Blocking)
             {
                 // Vanilla raises Blocking by 1 for a block and by more (2) for a parry.
                 bool parry = value > 1f;
                 float blockXp = Plugin.ShieldExperienceRate.Value;
                 Experience.AddExperience(player.GetCurrentBlocker(),
-                    parry ? blockXp * Plugin.ParryExperienceMultiplier.Value : blockXp);
-                ArmorExperiencePatch.AddToWornArmor(player, blockXp * Plugin.ArmorShareOfBlockExperience.Value);
+                    parry ? blockXp * Plugin.ParryExperienceMultiplier.Value : blockXp, enemyTier);
+                ArmorExperiencePatch.AddToWornArmor(player, blockXp * Plugin.ArmorShareOfBlockExperience.Value, enemyTier);
                 return;
             }
 
             ItemDrop.ItemData weapon = player.GetCurrentWeapon();
             if (weapon != null && weapon.m_shared.m_skillType == skill)
             {
-                Experience.AddExperience(weapon, value * Plugin.WeaponExperienceRate.Value);
+                Experience.AddExperience(weapon, value * Plugin.WeaponExperienceRate.Value, enemyTier);
             }
         }
     }
@@ -91,12 +92,12 @@ namespace EquipmentExperience
                 .RequireField(typeof(Humanoid), nameof(Humanoid.m_shoulderItem));
         }
 
-        public static void AddToWornArmor(Player player, float amount)
+        public static void AddToWornArmor(Player player, float amount, int enemyTier)
         {
-            Experience.AddExperience(player.m_helmetItem, amount);
-            Experience.AddExperience(player.m_chestItem, amount);
-            Experience.AddExperience(player.m_legItem, amount);
-            Experience.AddExperience(player.m_shoulderItem, amount);
+            Experience.AddExperience(player.m_helmetItem, amount, enemyTier);
+            Experience.AddExperience(player.m_chestItem, amount, enemyTier);
+            Experience.AddExperience(player.m_legItem, amount, enemyTier);
+            Experience.AddExperience(player.m_shoulderItem, amount, enemyTier);
         }
 
         private static void ApplyArmorPrefix(HitData __instance)
@@ -147,7 +148,7 @@ namespace EquipmentExperience
                 return;
             }
             float healthFraction = Mathf.Min(damage / maxHealth, 1f);
-            AddToWornArmor(player, healthFraction * Plugin.ArmorExperiencePerMaxHealth.Value);
+            AddToWornArmor(player, healthFraction * Plugin.ArmorExperiencePerMaxHealth.Value, Tiers.EnemyTier(attacker));
         }
 
         /// <summary>The damage vanilla counts against armor durability.</summary>

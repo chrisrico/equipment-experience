@@ -103,7 +103,7 @@ namespace EquipmentExperience
             }
             _pending = new PendingUpgrade
             {
-                IdolTier = Guardians.GetTier(gui.m_craftRecipe),
+                IdolTier = Tiers.IdolTier(gui.m_craftRecipe),
                 ForgeLevel = item.m_quality + 1 - item.m_shared.m_maxQuality,
                 ForgePosition = station.transform.position,
             };

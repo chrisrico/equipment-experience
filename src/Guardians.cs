@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using BepInEx.Configuration;
 using UnityEngine;
 
@@ -14,9 +13,6 @@ namespace EquipmentExperience
     /// </summary>
     public static class Guardians
     {
-        /// <summary>Idol prefabs are named Upgrader{tier}{Weapon|Armor}, tier 0 (Wooden) to 7 (Bloodgold).</summary>
-        private static readonly Regex IdolTier = new Regex(@"^Upgrader(\d+)");
-
         private static readonly string[] TierNames =
             { "Wooden", "Bronze", "Iron", "Silver", "BlackMetal", "BlackMarble", "Flametal", "Bloodgold" };
 
@@ -87,20 +83,6 @@ namespace EquipmentExperience
         public static void SetAvailable(bool available)
         {
             _available = available;
-        }
-
-        /// <summary>The idol tier from the idol's prefab name, or -1 if it doesn't follow the vanilla naming.</summary>
-        public static int GetTier(Recipe recipe)
-        {
-            foreach (Piece.Requirement requirement in recipe.m_resources)
-            {
-                if (requirement.m_upgraderResource && requirement.m_resItem != null)
-                {
-                    Match match = IdolTier.Match(requirement.m_resItem.gameObject.name);
-                    return match.Success ? int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : -1;
-                }
-            }
-            return -1;
         }
 
         public static void Summon(int tier, int forgeLevel, Vector3 forgePosition)

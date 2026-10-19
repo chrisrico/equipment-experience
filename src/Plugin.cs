@@ -74,6 +74,8 @@ namespace EquipmentExperience
             Guardians.BindConfig(Config);
 
             _harmony = new Harmony(PluginGuid);
+            // Experience before max level only if it survives workbench upgrades.
+            Experience.GainBeforeMaxLevel = CraftingUpgradeCarryOverPatch.Group().Apply(_harmony);
             WeaponExperiencePatch.Group().Apply(_harmony);
             ArmorExperiencePatch.Group().Apply(_harmony);
             TooltipPatch.Group().Apply(_harmony);

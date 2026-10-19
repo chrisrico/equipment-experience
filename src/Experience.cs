@@ -74,10 +74,19 @@ namespace EquipmentExperience
             return item.m_shared.m_maxQuality > 1 && item.m_quality >= item.m_shared.m_maxQuality;
         }
 
-        /// <summary>Whether this item accumulates experience: it is at max crafting level and forge-upgradable.</summary>
+        /// <summary>
+        /// Whether items below max crafting level gain experience. Only safe while experience survives workbench
+        /// upgrades, so it is turned on only when that carry-over patch loads.
+        /// </summary>
+        public static bool GainBeforeMaxLevel;
+
+        /// <summary>Whether this item accumulates experience: it is forge-upgradable (and at max level, unless
+        /// <see cref="GainBeforeMaxLevel"/>).</summary>
         public static bool CanGainExperience(ItemDrop.ItemData item)
         {
-            return item?.m_shared != null && IsAtMaxCraftingLevel(item) && GetForgeRecipe(item) != null;
+            return item?.m_shared != null && item.m_shared.m_maxQuality > 1
+                   && (GainBeforeMaxLevel || IsAtMaxCraftingLevel(item))
+                   && GetForgeRecipe(item) != null;
         }
 
         /// <summary>Experience needed to fill the bar at the item's current level.</summary>
@@ -131,8 +140,10 @@ namespace EquipmentExperience
             if (after >= required && Plugin.NotifyWhenReady.Value && Player.m_localPlayer != null)
             {
                 string name = Localization.instance.Localize(item.m_shared.m_name);
-                Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft,
-                    $"{name} is ready to be upgraded at the Forge of Potential", 0, item.GetIcon());
+                string message = IsAtMaxCraftingLevel(item)
+                    ? $"{name} is ready to be upgraded at the Forge of Potential"
+                    : $"{name} has a full experience bar. Upgrade it to max level to refine it at the Forge of Potential";
+                Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, message, 0, item.GetIcon());
             }
         }
 

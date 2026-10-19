@@ -6,8 +6,8 @@ In the base game, refining an item with an idol is a gamble. Every idol succeeds
 destroys the item, giving back only 35% of its crafting materials. The roll comes from a PRNG seeded with the item type,
 the target level and your player name. With this mod:
 
-- **Items at their maximum crafting level gain experience as you use them.** This covers every item the Forge of
-  Potential can upgrade:
+- **Items gain experience as you use them.** This covers every item the Forge of Potential can upgrade, from the
+  moment it's crafted:
   - **Weapons and tools** gain experience on every hit that raises their own skill: melee hits, arrows and bolts that
     land, magic, and chopping or mining with the right tool.
   - **Shields** gain experience on every block. A parry (perfect block) gives 2× by default. If you block
@@ -22,10 +22,12 @@ the target level and your player name. With this mod:
 - **Every upgrade awakens the forge's guardians.** Creatures from the idol's biome spawn around the forge and attack.
 - An item's experience shows in its tooltip. At the forge you also see the bar and the success chance.
 - Items below their maximum crafting level can't be upgraded at the Forge of Potential. Upgrade them at their normal
-  crafting station first.
+  crafting station first. Experience earned before then counts toward the first forge upgrade, up to one full bar, and
+  carries over through workbench upgrades. An item you've used since crafting it can reach max level already ready for
+  the forge.
 
 Experience is stored in each item's custom data. It is saved with your character and stays with the item when it goes
-into a chest or to another player. An upgrade starts the new level with an empty bar.
+into a chest or to another player. A forge upgrade starts the new level with an empty bar.
 
 ## Installation
 
@@ -134,8 +136,9 @@ Most of the forge upgrade is still vanilla's own code. The mod decides whether t
 a roll that forces that outcome, so anything Iron Gate adds to the upgrade process still runs.
 
 The patches are applied in independent groups: weapon/shield experience, armor experience, the tooltip, the forge
-upgrade, and the forge panel. The guardians have their own startup check. If it fails, upgrades still work, just without
-guardians.
+upgrade, the forge panel, and experience carry-over on workbench upgrades. The guardians have their own startup check.
+If it fails, upgrades still work, just without guardians. If the carry-over group fails, items only gain experience at
+max crafting level, so a workbench upgrade can never wipe banked experience.
 
 - **At startup**, each group checks that every game member it uses still exists. If an update renamed one, that group
   is turned off and the BepInEx log names the missing member and the game version. The other groups keep working.

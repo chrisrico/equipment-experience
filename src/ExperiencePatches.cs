@@ -157,6 +157,99 @@ namespace EquipmentExperience
         }
     }
 
+    /// <summary>
+    /// Keeps experience through normal crafting-station upgrades. Vanilla replaces the item with a new one at the same
+    /// inventory slot and doesn't copy its custom data, so the experience is read before the upgrade and written onto
+    /// the new item afterwards. Forge upgrades are left alone: they start the next level with an empty bar.
+    /// </summary>
+    public static class CraftingUpgradeCarryOverPatch
+    {
+        private struct Carried
+        {
+            public float Experience;
+            public Vector2i Position;
+            public string Name;
+            public int Quality;
+        }
+
+        private static Carried? _carried;
+
+        public static PatchGroup Group()
+        {
+            return new PatchGroup("Experience carry-over on crafting upgrades")
+                .With(Experience.RequireCore)
+                .RequireField(typeof(InventoryGui), nameof(InventoryGui.m_craftUpgradeItem))
+                .RequireField(typeof(CraftingStation), nameof(CraftingStation.m_upgrader))
+                .RequireMethod(typeof(Inventory), nameof(Inventory.GetItemAt), typeof(int), typeof(int))
+                .Patch(typeof(CraftingUpgradeCarryOverPatch), typeof(InventoryGui), nameof(InventoryGui.DoCrafting),
+                    new[] { typeof(Player) }, HarmonyPatchType.Prefix, nameof(Prefix))
+                .Patch(typeof(CraftingUpgradeCarryOverPatch), typeof(InventoryGui), nameof(InventoryGui.DoCrafting),
+                    new[] { typeof(Player) }, HarmonyPatchType.Postfix, nameof(Postfix));
+        }
+
+        private static void Prefix(InventoryGui __instance, Player player)
+        {
+            _carried = null;
+            try
+            {
+                Capture(__instance, player);
+            }
+            catch (Exception e)
+            {
+                Guard.Report("Experience carry-over on crafting upgrades", e);
+            }
+        }
+
+        private static void Capture(InventoryGui gui, Player player)
+        {
+            ItemDrop.ItemData item = gui.m_craftUpgradeItem;
+            CraftingStation station = player.GetCurrentCraftingStation();
+            if (item == null || (station != null && station.m_upgrader))
+            {
+                return;
+            }
+            float xp = Experience.GetExperience(item);
+            if (xp > 0f)
+            {
+                _carried = new Carried
+                {
+                    Experience = xp,
+                    Position = item.m_gridPos,
+                    Name = item.m_shared.m_name,
+                    Quality = item.m_quality + 1,
+                };
+            }
+        }
+
+        private static void Postfix(Player player)
+        {
+            Carried? carried = _carried;
+            _carried = null;
+            if (carried == null)
+            {
+                return;
+            }
+            try
+            {
+                Restore(player, carried.Value);
+            }
+            catch (Exception e)
+            {
+                Guard.Report("Experience carry-over on crafting upgrades", e);
+            }
+        }
+
+        private static void Restore(Player player, Carried carried)
+        {
+            ItemDrop.ItemData upgraded = player.GetInventory().GetItemAt(carried.Position.x, carried.Position.y);
+            // Only if the upgrade happened: the slot now holds the same item one level higher.
+            if (upgraded != null && upgraded.m_shared.m_name == carried.Name && upgraded.m_quality == carried.Quality)
+            {
+                Experience.SetExperience(upgraded, Mathf.Min(carried.Experience, Experience.GetRequired(upgraded)));
+            }
+        }
+    }
+
     /// <summary>Shows the experience bar in the item tooltip.</summary>
     public static class TooltipPatch
     {

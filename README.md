@@ -42,7 +42,7 @@ The mod is client-side. You don't need it on the server, and other players don't
 
 ## Configuration
 
-Config file: `BepInEx/config/chrisrico.equipmentexperience.cfg`
+Config file: `BepInEx/config/nerdtastic.equipmentexperience.cfg`
 
 | Section    | Key                           | Default           | Description |
 |------------|-------------------------------|-------------------|-------------|

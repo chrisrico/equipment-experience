@@ -8,7 +8,7 @@ namespace EquipmentExperience
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public class Plugin : BaseUnityPlugin
     {
-        public const string PluginGuid = "chrisrico.equipmentexperience";
+        public const string PluginGuid = "nerdtastic.equipmentexperience";
         public const string PluginName = "Equipment Experience";
         public const string PluginVersion = PluginInfo.Version;
 

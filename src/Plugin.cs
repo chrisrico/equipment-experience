@@ -18,6 +18,7 @@ namespace EquipmentExperience
         public static ConfigEntry<float> ParryExperienceMultiplier;
         public static ConfigEntry<float> ArmorExperiencePerMaxHealth;
         public static ConfigEntry<float> ArmorShareOfBlockExperience;
+        public static ConfigEntry<float> ShieldStaffExperiencePerShield;
         public static ConfigEntry<float> BaseExperience;
         public static ConfigEntry<float> ExperienceGrowth;
         public static ConfigEntry<bool> NotifyWhenReady;
@@ -59,6 +60,12 @@ namespace EquipmentExperience
                 new ConfigDescription(
                     "Fraction of a block's experience (before the parry bonus) that each equipped armor piece also gains.",
                     new AcceptableValueRange<float>(0f, 10f)));
+            ShieldStaffExperiencePerShield = Config.Bind("Experience", "ShieldStaffExperiencePerShield", 10f,
+                new ConfigDescription(
+                    "Experience a shield-casting staff (Staff of Protection) gains when the shield it cast on you " +
+                    "absorbs its full capacity of damage; each absorbed hit gives its share. Summoning staves (Dead " +
+                    "Raiser) gain WeaponExperienceRate per point of skill experience their summons earn you.",
+                    new AcceptableValueRange<float>(0f, 1000f)));
 
             BaseExperience = Config.Bind("Leveling", "BaseExperience", 500f,
                 new ConfigDescription(
@@ -81,6 +88,8 @@ namespace EquipmentExperience
             Experience.GainBeforeMaxLevel = CraftingUpgradeCarryOverPatch.Group().Apply(_harmony);
             WeaponExperiencePatch.Group().Apply(_harmony);
             ArmorExperiencePatch.Group().Apply(_harmony);
+            SummonExperiencePatch.Group().Apply(_harmony);
+            ProtectionExperiencePatch.Group().Apply(_harmony);
             TooltipPatch.Group().Apply(_harmony);
             if (ForgeUpgradePatch.Group().Apply(_harmony))
             {
@@ -111,6 +120,8 @@ namespace EquipmentExperience
                 CraftingUpgradeCarryOverPatch.Group(),
                 WeaponExperiencePatch.Group(),
                 ArmorExperiencePatch.Group(),
+                SummonExperiencePatch.Group(),
+                ProtectionExperiencePatch.Group(),
                 TooltipPatch.Group(),
                 ForgeUpgradePatch.Group(),
                 ForgePanelPatch.Group(),

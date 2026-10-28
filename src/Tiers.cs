@@ -231,7 +231,7 @@ namespace EquipmentExperience
             return parsed;
         }
 
-        private static string PrefabName(GameObject go)
+        public static string PrefabName(GameObject go)
         {
             string name = go.name;
             int clone = name.IndexOf("(Clone)", StringComparison.Ordinal);

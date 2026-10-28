@@ -46,10 +46,16 @@ and categories in `thunderstore.toml`. Only after a successful upload does it ta
 tag.
 
 The upload needs a Thunderstore service account token. Create one under the Nerdtastic team's settings on
-thunderstore.io and store it in the keychain:
+thunderstore.io and store it in the keychain on macOS:
 
 ```sh
 security add-generic-password -a "$USER" -s thunderstore-token -w   # prompts for the token
+```
+
+or in the Secret Service keyring on Linux:
+
+```sh
+secret-tool store --label="Thunderstore token" service thunderstore-token   # prompts for the token
 ```
 
 Setting `TCLI_AUTH_TOKEN` instead also works.

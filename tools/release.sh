@@ -23,7 +23,14 @@ status=$(curl -s -o /dev/null -w '%{http_code}' \
   "https://thunderstore.io/api/experimental/package/Nerdtastic/EquipmentExperience/$version/")
 [[ $status == 404 ]] || die "Thunderstore already has $version (HTTP $status)"
 
-token=${TCLI_AUTH_TOKEN:-$(security find-generic-password -s thunderstore-token -w 2>/dev/null || true)}
+token=${TCLI_AUTH_TOKEN:-}
+if [[ -z $token ]]; then
+  if command -v security >/dev/null; then
+    token=$(security find-generic-password -s thunderstore-token -w 2>/dev/null || true)
+  elif command -v secret-tool >/dev/null; then
+    token=$(secret-tool lookup service thunderstore-token 2>/dev/null || true)
+  fi
+fi
 [[ -n $token ]] || die "no Thunderstore token; see DEVELOPMENT.md"
 
 dotnet run --project tools/GameApiCheck || die "game API check failed"

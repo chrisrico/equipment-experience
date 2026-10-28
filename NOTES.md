@@ -8,6 +8,8 @@ Decision log and gotchas that git history doesn't capture.
   and `WeaponExperiencePatch` never sees those calls. Blood magic does this in two places: `SE_Shield.IsDone` when a
   shield breaks, and `Character.RaiseSkill` on a tamed summon, which passes it on to its follow target. Dodge
   (`Player.cs`) does it too. `src/BloodMagicPatches.cs` covers the blood magic paths.
+- **A weapon's hits don't always raise the weapon's own skill.** `Attack.m_specialHitSkill` replaces it on special
+  targets: an axe hitting a tree raises Wood Cutting (13), not Axes (7). The weapon patch accepts either.
 - `Character.RaiseSkill` on a summon also fires for its jumps (`Character.cs`, `RaiseSkill(Jump)`), and vanilla
   passes those on as Blood Magic. The summon patch ignores them.
 - **Build environment on this machine:** there's no system .NET SDK; one was installed to a session scratchpad.

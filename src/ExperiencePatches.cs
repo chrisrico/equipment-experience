@@ -16,6 +16,9 @@ namespace EquipmentExperience
                 .With(Experience.RequireCore)
                 .RequireMethod(typeof(Humanoid), nameof(Humanoid.GetCurrentWeapon))
                 .RequireMethod(typeof(Humanoid), nameof(Humanoid.GetCurrentBlocker))
+                .RequireField(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_attack))
+                .RequireField(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_secondaryAttack))
+                .RequireField(typeof(Attack), nameof(Attack.m_specialHitSkill))
                 .With(ArmorExperiencePatch.RequireArmorSlots)
                 .Patch(typeof(WeaponExperiencePatch), typeof(Player), nameof(Player.RaiseSkill),
                     new[] { typeof(Skills.SkillType), typeof(float) }, HarmonyPatchType.Prefix, nameof(Prefix));
@@ -53,11 +56,22 @@ namespace EquipmentExperience
             }
 
             ItemDrop.ItemData weapon = player.GetCurrentWeapon();
-            if (weapon != null && weapon.m_shared.m_skillType == skill)
+            if (weapon != null && UsesSkill(weapon, skill))
             {
                 int enemyTier = Tiers.TakeTargetTier(player.transform.position);
                 Experience.AddExperience(weapon, value * Plugin.WeaponExperienceRate.Value, enemyTier);
             }
+        }
+
+        /// <summary>
+        /// The weapon's own skill, or the skill its attacks raise on special targets instead (an axe hitting a tree
+        /// raises Wood Cutting, not Axes).
+        /// </summary>
+        private static bool UsesSkill(ItemDrop.ItemData weapon, Skills.SkillType skill)
+        {
+            return weapon.m_shared.m_skillType == skill
+                   || weapon.m_shared.m_attack?.m_specialHitSkill == skill
+                   || weapon.m_shared.m_secondaryAttack?.m_specialHitSkill == skill;
         }
     }
 

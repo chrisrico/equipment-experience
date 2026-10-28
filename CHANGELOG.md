@@ -5,6 +5,7 @@
 - Fixed: the Dead Raiser and Staff of Protection never gained experience. A Dead Raiser now gains experience when its
   skeletons hit something, and a Staff of Protection gains experience as its shield on you absorbs damage
   (`ShieldStaffExperiencePerShield`, 10 per full shield by default).
+- Fixed: axes gained no experience from chopping trees, because chopping raises Wood Cutting rather than Axes.
 
 ## 1.0.1
 

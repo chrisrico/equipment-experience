@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.2
 
 - Fixed: the Dead Raiser and Staff of Protection never gained experience. A Dead Raiser now gains experience when its
   skeletons hit something, and a Staff of Protection gains experience as its shield on you absorbs damage

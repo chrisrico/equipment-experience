@@ -59,6 +59,11 @@ namespace EquipmentExperience
             if (weapon != null && UsesSkill(weapon, skill))
             {
                 int enemyTier = Tiers.TakeTargetTier(player.transform.position);
+                // Ore is where it is, so mining in a lower biome isn't farming easy targets: pickaxes aren't scaled.
+                if (weapon.m_shared.m_skillType == Skills.SkillType.Pickaxes)
+                {
+                    enemyTier = Tiers.Unknown;
+                }
                 Experience.AddExperience(weapon, value * Plugin.WeaponExperienceRate.Value, enemyTier);
             }
         }

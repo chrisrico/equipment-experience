@@ -118,6 +118,7 @@ the item, or by `HigherTierMultiplier` for each tier above. Fighting at your gea
   3. Otherwise, the biome the enemy is standing in. Greydwarfs, the undead, animals, bosses and Dvergr appear in several
      biomes, so their location decides. This also covers creatures added by other mods, with no list to maintain.
 - **Hits on trees and rocks** use the biome you're standing in.
+- **Pickaxes aren't scaled.** All their experience counts as 1×, whatever they hit and wherever you are.
 - **Blocks** use the attacker's tier. **Armor hits** also use the attacker's tier, and each piece compares it with its
   own tier.
 - **Unknown cases count as 1×:** the ocean, a biome the mod doesn't recognise, or a non-vanilla idol.

@@ -6,6 +6,7 @@
   skeletons hit something, and a Staff of Protection gains experience as its shield on you absorbs damage
   (`ShieldStaffExperiencePerShield`, 10 per full shield by default).
 - Fixed: axes gained no experience from chopping trees, because chopping raises Wood Cutting rather than Axes.
+- Pickaxe experience is no longer scaled by tier, so mining in a lower biome no longer earns less.
 
 ## 1.0.1
 

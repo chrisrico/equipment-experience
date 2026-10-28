@@ -62,8 +62,8 @@ namespace EquipmentExperience
                     new AcceptableValueRange<float>(0f, 10f)));
             ShieldStaffExperiencePerShield = Config.Bind("Experience", "ShieldStaffExperiencePerShield", 10f,
                 new ConfigDescription(
-                    "Experience a shield-casting staff (Staff of Protection) gains when the shield it cast on you " +
-                    "absorbs its full capacity of damage; each absorbed hit gives its share. Summoning staves (Dead " +
+                    "Experience a shield-casting staff (Staff of Protection) gains when a shield it cast on you or " +
+                    "a creature following you absorbs its full capacity of damage; each absorbed hit gives its share. Summoning staves (Dead " +
                     "Raiser) gain WeaponExperienceRate per point of skill experience their summons earn you.",
                     new AcceptableValueRange<float>(0f, 1000f)));
 

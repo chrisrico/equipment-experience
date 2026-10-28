@@ -131,9 +131,11 @@ namespace EquipmentExperience
     }
 
     /// <summary>
-    /// Shield staves (Staff of Protection) gain experience as the shield they cast on you absorbs damage. Vanilla only
-    /// raises the skill once, when the shield breaks; awarding each absorbed hit's share of the shield's capacity gives
-    /// the same total for a broken shield and also counts shields that expire first.
+    /// Shield staves (Staff of Protection) gain experience as the shield they cast on you or a creature following you
+    /// (summons, tames) absorbs damage. Vanilla only raises the skill once, when the shield breaks, and only for the
+    /// shielded character; awarding each absorbed hit's share of the shield's capacity gives the same total for a
+    /// broken shield and also counts shields that expire first. Shields on other players run on their client and
+    /// aren't seen here.
     /// </summary>
     public static class ProtectionExperiencePatch
     {
@@ -150,6 +152,7 @@ namespace EquipmentExperience
                 .RequireField(typeof(Aoe), nameof(Aoe.m_statusEffect))
                 .RequireField(typeof(Aoe), nameof(Aoe.m_statusEffectIfPlayer))
                 .RequireMethod(typeof(StatusEffect), nameof(StatusEffect.NameHash))
+                .RequireMethod(typeof(MonsterAI), nameof(MonsterAI.GetFollowTarget))
                 .Patch(typeof(ProtectionExperiencePatch), typeof(SE_Shield), nameof(SE_Shield.OnDamaged),
                     new[] { typeof(HitData), typeof(Character) }, HarmonyPatchType.Prefix, nameof(Prefix));
         }
@@ -169,8 +172,8 @@ namespace EquipmentExperience
         private static void Award(SE_Shield shield, HitData hit, Character attacker)
         {
             Player player = Player.m_localPlayer;
-            if (player == null || shield.m_character != player || shield.m_levelUpSkillOnBreak == Skills.SkillType.None
-                || shield.m_totalAbsorbDamage <= 0f)
+            if (player == null || !IsYoursToProtect(shield.m_character, player)
+                || shield.m_levelUpSkillOnBreak == Skills.SkillType.None || shield.m_totalAbsorbDamage <= 0f)
             {
                 return;
             }
@@ -186,6 +189,20 @@ namespace EquipmentExperience
             Experience.AddExperience(staff,
                 share * shield.m_levelUpSkillFactor * Plugin.ShieldStaffExperiencePerShield.Value,
                 Tiers.EnemyTier(attacker));
+        }
+
+        private static bool IsYoursToProtect(Character shielded, Player player)
+        {
+            if (shielded == player)
+            {
+                return true;
+            }
+            if (shielded == null || !shielded.IsTamed())
+            {
+                return false;
+            }
+            MonsterAI ai = shielded.GetComponent<MonsterAI>();
+            return ai != null && ai.GetFollowTarget() == player.gameObject;
         }
 
         private static bool Applies(GameObject projectile, int effect)

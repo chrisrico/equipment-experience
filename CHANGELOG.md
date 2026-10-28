@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The Staff of Protection also gains experience when its shield absorbs damage on a creature following you (your
+  skeletons, tames), not only on you.
+
 ## 1.0.2
 
 - Fixed: the Dead Raiser and Staff of Protection never gained experience. A Dead Raiser now gains experience when its

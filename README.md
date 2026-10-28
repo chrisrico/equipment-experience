@@ -12,7 +12,8 @@ the target level and your player name. With this mod:
     land, magic, and chopping or mining with the right tool.
   - **Blood magic staves** that don't hit anything themselves gain experience from what they cast, even after you
     put them away (the staff stays in your inventory): a **Dead Raiser** gains experience whenever its skeletons hit
-    something, and a **Staff of Protection** gains experience as the shield it cast on you absorbs damage.
+    something, and a **Staff of Protection** gains experience as the shields it cast on you and on creatures
+    following you (your skeletons, tames) absorb damage.
   - **Shields** gain experience on every block. A parry (perfect block) gives 2× by default. If you block
     without a shield, the weapon you block with gets the experience.
   - **Armor** pieces you are wearing (helmet, chest, legs and cape) gain experience in two ways:
@@ -55,7 +56,7 @@ Config file: `BepInEx/config/nerdtastic.equipmentexperience.cfg`
 | Experience | `ParryExperienceMultiplier`   | 2.0               | Multiplier on the blocking item's experience for a parry. |
 | Experience | `ArmorExperiencePerMaxHealth` | 12                | Experience for each worn piece from a hit equal to your max health (smaller hits give a proportional share). |
 | Experience | `ArmorShareOfBlockExperience` | 0.5               | Fraction of a block's experience (before the parry bonus) that each worn piece also gains. |
-| Experience | `ShieldStaffExperiencePerShield` | 10             | Experience for a Staff of Protection when its shield on you absorbs its full capacity (each hit gives its share). |
+| Experience | `ShieldStaffExperiencePerShield` | 10             | Experience for a Staff of Protection when its shield on you or a follower absorbs its full capacity (each hit gives its share). |
 | Tiers      | `LowerTierMultiplier`         | 0.8               | Multiplier per biome the enemy is below the item's tier. |
 | Tiers      | `HigherTierMultiplier`        | 1.2               | Multiplier per biome the enemy is above the item's tier. |
 | Tiers      | `EnemyTierOverrides`          | `Surtling:2, GoblinDeepNorth:7` | `Prefab:tier` exceptions to the enemy tier rules. |

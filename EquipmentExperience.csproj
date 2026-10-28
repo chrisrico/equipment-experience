@@ -29,7 +29,7 @@
     <ValheimDir Condition="'$(ValheimDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Valheim</ValheimDir>
     <ManagedDir Condition="Exists('$(ValheimDir)/valheim.app/Contents/Resources/Data/Managed')">$(ValheimDir)/valheim.app/Contents/Resources/Data/Managed</ManagedDir>
     <ManagedDir Condition="'$(ManagedDir)' == ''">$(ValheimDir)/valheim_Data/Managed</ManagedDir>
-    <BepInExDir>$(ValheimDir)/BepInEx</BepInExDir>
+    <BepInExDir Condition="'$(BepInExDir)' == ''">$(ValheimDir)/BepInEx</BepInExDir>
   </PropertyGroup>
 
   <ItemGroup>

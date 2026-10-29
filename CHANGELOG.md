@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.3
 
 - The Staff of Protection also gains experience when its shield absorbs damage on a creature following you (your
   skeletons, tames), not only on you.

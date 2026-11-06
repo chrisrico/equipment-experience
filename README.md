@@ -11,9 +11,10 @@ the target level and your player name. With this mod:
   - **Weapons and tools** gain experience on every hit that raises their own skill: melee hits, arrows and bolts that
     land, magic, and chopping or mining with the right tool.
   - **Blood magic staves** that don't hit anything themselves gain experience from what they cast, even after you
-    put them away (the staff stays in your inventory): a **Dead Raiser** gains experience whenever its skeletons hit
-    something, and a **Staff of Protection** gains experience as the shields it cast on you and on creatures
-    following you (your skeletons, tames) absorb damage.
+    put them away (the staff stays in your inventory): a **Dead Raiser**, **Spirit Caller** or **Trollstav** gains
+    experience whenever its summons hit something, a **Staff of Protection** gains experience as the shields it cast
+    on you and on creatures following you (your skeletons, tames) absorb damage, and **Northern Vengeance** gains
+    experience each time its effect on you or a creature following you fires back at an attacker.
   - **Shields** gain experience on every block. A parry (perfect block) gives 2× by default. If you block
     without a shield, the weapon you block with gets the experience.
   - **Armor** pieces you are wearing (helmet, chest, legs and cape) gain experience in two ways:

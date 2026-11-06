@@ -52,19 +52,66 @@ namespace EquipmentExperience
             GameObject secondary = item.m_shared.m_secondaryAttack?.m_attackProjectile;
             return (primary != null && casts(primary)) || (secondary != null && casts(secondary));
         }
+
+        public static PatchGroup RequireEffectLookup(PatchGroup group)
+        {
+            return group
+                .RequireField(typeof(StatusEffect), nameof(StatusEffect.m_character))
+                .RequireField(typeof(Aoe), nameof(Aoe.m_statusEffect))
+                .RequireField(typeof(Aoe), nameof(Aoe.m_statusEffectIfPlayer))
+                .RequireMethod(typeof(StatusEffect), nameof(StatusEffect.NameHash))
+                .RequireMethod(typeof(MonsterAI), nameof(MonsterAI.GetFollowTarget));
+        }
+
+        /// <summary>Whether a staff's effect on this character counts for you: it's you or a creature following you.</summary>
+        public static bool IsYoursToProtect(Character shielded, Player player)
+        {
+            if (shielded == player)
+            {
+                return true;
+            }
+            if (shielded == null || !shielded.IsTamed())
+            {
+                return false;
+            }
+            MonsterAI ai = shielded.GetComponent<MonsterAI>();
+            return ai != null && ai.GetFollowTarget() == player.gameObject;
+        }
+
+        /// <summary>The item that applies a status effect through an Aoe attack.</summary>
+        public static ItemDrop.ItemData FindEffectCaster(Player player, StatusEffect effect)
+        {
+            int hash = effect.NameHash();
+            return FindCaster(player, projectile =>
+            {
+                Aoe aoe = projectile.GetComponent<Aoe>();
+                return aoe != null && (Is(aoe.m_statusEffect, hash) || Is(aoe.m_statusEffectIfPlayer, hash));
+            });
+        }
+
+        private static bool Is(string statusEffect, int hash)
+        {
+            return !string.IsNullOrEmpty(statusEffect) && statusEffect.GetStableHashCode() == hash;
+        }
     }
 
     /// <summary>
-    /// Summoning staves (Dead Raiser) gain experience when their summons hit something. Vanilla passes the summon's
-    /// skill experience to its owner in Character.RaiseSkill, scaled by Tameable.m_levelUpFactor.
+    /// Summoning staves (Dead Raiser, Spirit Caller, Trollstav) gain experience when their summons hit something.
+    /// Vanilla passes a tamed summon's skill experience to its owner in Character.RaiseSkill, scaled by
+    /// Tameable.m_levelUpFactor. Trollstav trolls have no Tameable, so vanilla gives them no owner and no skill
+    /// experience: they get the same scale here, and go to the Trollstav on the client running their attacks.
     /// </summary>
     public static class SummonExperiencePatch
     {
+        /// <summary>The Tameable.m_levelUpFactor of every summon that has one.</summary>
+        private const float UntamedSummonFactor = 0.5f;
+
         public static PatchGroup Group()
         {
             return new PatchGroup("Summoning staff experience")
                 .With(Experience.RequireCore)
                 .With(BloodMagic.RequireCasterLookup)
+                .RequireField(typeof(Character), nameof(Character.m_faction))
                 .RequireField(typeof(Tameable), nameof(Tameable.m_levelUpOwnerSkill))
                 .RequireField(typeof(Tameable), nameof(Tameable.m_levelUpFactor))
                 .RequireField(typeof(SpawnAbility), nameof(SpawnAbility.m_spawnPrefab))
@@ -93,14 +140,12 @@ namespace EquipmentExperience
         private static void Award(Character summon, float value)
         {
             Player player = Player.m_localPlayer;
-            if (player == null || !summon.IsTamed())
+            if (player == null)
             {
                 return;
             }
-            Tameable tameable = summon.GetComponent<Tameable>();
             MonsterAI ai = summon.GetComponent<MonsterAI>();
-            if (tameable == null || ai == null || tameable.m_levelUpOwnerSkill == Skills.SkillType.None
-                || ai.GetFollowTarget() != player.gameObject)
+            if (ai == null || !TryGetFactor(summon, ai, player, out float factor))
             {
                 return;
             }
@@ -108,8 +153,20 @@ namespace EquipmentExperience
             ItemDrop.ItemData staff = BloodMagic.FindCaster(player, projectile => Spawns(projectile, prefab));
             Character target = ai.GetTargetCreature();
             int enemyTier = target != null ? Tiers.EnemyTier(target) : Tiers.LocationTier(summon.transform.position);
-            Experience.AddExperience(staff, value * tameable.m_levelUpFactor * Plugin.WeaponExperienceRate.Value,
-                enemyTier);
+            Experience.AddExperience(staff, value * factor * Plugin.WeaponExperienceRate.Value, enemyTier);
+        }
+
+        private static bool TryGetFactor(Character summon, MonsterAI ai, Player player, out float factor)
+        {
+            factor = UntamedSummonFactor;
+            Tameable tameable = summon.GetComponent<Tameable>();
+            if (tameable == null)
+            {
+                return summon.m_faction == Character.Faction.PlayerSpawned;
+            }
+            factor = tameable.m_levelUpFactor;
+            return summon.IsTamed() && tameable.m_levelUpOwnerSkill != Skills.SkillType.None
+                                    && ai.GetFollowTarget() == player.gameObject;
         }
 
         private static bool Spawns(GameObject projectile, string prefab)
@@ -144,15 +201,11 @@ namespace EquipmentExperience
             return new PatchGroup("Shield staff experience")
                 .With(Experience.RequireCore)
                 .With(BloodMagic.RequireCasterLookup)
-                .RequireField(typeof(StatusEffect), nameof(StatusEffect.m_character))
+                .With(BloodMagic.RequireEffectLookup)
                 .RequireField(typeof(SE_Shield), nameof(SE_Shield.m_levelUpSkillOnBreak))
                 .RequireField(typeof(SE_Shield), nameof(SE_Shield.m_levelUpSkillFactor))
                 .RequireField(typeof(SE_Shield), nameof(SE_Shield.m_totalAbsorbDamage))
                 .RequireField(typeof(SE_Shield), nameof(SE_Shield.m_damage))
-                .RequireField(typeof(Aoe), nameof(Aoe.m_statusEffect))
-                .RequireField(typeof(Aoe), nameof(Aoe.m_statusEffectIfPlayer))
-                .RequireMethod(typeof(StatusEffect), nameof(StatusEffect.NameHash))
-                .RequireMethod(typeof(MonsterAI), nameof(MonsterAI.GetFollowTarget))
                 .Patch(typeof(ProtectionExperiencePatch), typeof(SE_Shield), nameof(SE_Shield.OnDamaged),
                     new[] { typeof(HitData), typeof(Character) }, HarmonyPatchType.Prefix, nameof(Prefix));
         }
@@ -172,7 +225,7 @@ namespace EquipmentExperience
         private static void Award(SE_Shield shield, HitData hit, Character attacker)
         {
             Player player = Player.m_localPlayer;
-            if (player == null || !IsYoursToProtect(shield.m_character, player)
+            if (player == null || !BloodMagic.IsYoursToProtect(shield.m_character, player)
                 || shield.m_levelUpSkillOnBreak == Skills.SkillType.None || shield.m_totalAbsorbDamage <= 0f)
             {
                 return;
@@ -183,37 +236,56 @@ namespace EquipmentExperience
             {
                 return;
             }
-            int effect = shield.NameHash();
-            ItemDrop.ItemData staff = BloodMagic.FindCaster(player, projectile => Applies(projectile, effect));
+            ItemDrop.ItemData staff = BloodMagic.FindEffectCaster(player, shield);
             float share = absorbed / shield.m_totalAbsorbDamage;
             Experience.AddExperience(staff,
                 share * shield.m_levelUpSkillFactor * Plugin.ShieldStaffExperiencePerShield.Value,
                 Tiers.EnemyTier(attacker));
         }
+    }
 
-        private static bool IsYoursToProtect(Character shielded, Player player)
+    /// <summary>
+    /// Retaliation staves (Northern Vengeance) gain experience each time their effect on you or a creature following
+    /// you fires back at an attacker. Vanilla launches the orb with no skill set, so it raises nothing when it lands.
+    /// </summary>
+    public static class RetaliationExperiencePatch
+    {
+        public static PatchGroup Group()
         {
-            if (shielded == player)
-            {
-                return true;
-            }
-            if (shielded == null || !shielded.IsTamed())
-            {
-                return false;
-            }
-            MonsterAI ai = shielded.GetComponent<MonsterAI>();
-            return ai != null && ai.GetFollowTarget() == player.gameObject;
+            return new PatchGroup("Retaliation staff experience")
+                .With(Experience.RequireCore)
+                .With(BloodMagic.RequireCasterLookup)
+                .With(BloodMagic.RequireEffectLookup)
+                .RequireField(typeof(SE_React), nameof(SE_React.m_spawnObj))
+                .RequireField(typeof(SE_React), nameof(SE_React.m_minSpawnDamage))
+                .Patch(typeof(RetaliationExperiencePatch), typeof(SE_React), nameof(SE_React.OnDamaged),
+                    new[] { typeof(HitData), typeof(Character) }, HarmonyPatchType.Prefix, nameof(Prefix));
         }
 
-        private static bool Applies(GameObject projectile, int effect)
+        private static void Prefix(SE_React __instance, HitData hit, Character attacker)
         {
-            Aoe aoe = projectile.GetComponent<Aoe>();
-            return aoe != null && (Is(aoe.m_statusEffect, effect) || Is(aoe.m_statusEffectIfPlayer, effect));
+            try
+            {
+                Award(__instance, hit, attacker);
+            }
+            catch (Exception e)
+            {
+                Guard.Report("Retaliation staff experience", e);
+            }
         }
 
-        private static bool Is(string statusEffect, int effect)
+        private static void Award(SE_React effect, HitData hit, Character attacker)
         {
-            return !string.IsNullOrEmpty(statusEffect) && statusEffect.GetStableHashCode() == effect;
+            Player player = Player.m_localPlayer;
+            // The same conditions vanilla checks before it launches the orb.
+            if (player == null || attacker == null || effect.m_spawnObj == null
+                || hit.GetTotalDamage() < effect.m_minSpawnDamage
+                || !BloodMagic.IsYoursToProtect(effect.m_character, player))
+            {
+                return;
+            }
+            Experience.AddExperience(BloodMagic.FindEffectCaster(player, effect), Plugin.WeaponExperienceRate.Value,
+                Tiers.EnemyTier(attacker));
         }
     }
 }

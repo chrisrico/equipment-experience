@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: the Trollstav never gained experience. It now gains experience when its trolls hit something, at the same
+  rate as other summoning staves.
+- Fixed: Northern Vengeance never gained experience. It now gains experience each time its effect on you or a creature
+  following you fires back at an attacker.
+
 ## 1.0.3
 
 - The Staff of Protection also gains experience when its shield absorbs damage on a creature following you (your

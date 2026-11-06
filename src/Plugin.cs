@@ -64,7 +64,8 @@ namespace EquipmentExperience
                 new ConfigDescription(
                     "Experience a shield-casting staff (Staff of Protection) gains when a shield it cast on you or " +
                     "a creature following you absorbs its full capacity of damage; each absorbed hit gives its share. Summoning staves (Dead " +
-                    "Raiser) gain WeaponExperienceRate per point of skill experience their summons earn you.",
+                    "Raiser, Spirit Caller, Trollstav) gain WeaponExperienceRate per point of skill experience their " +
+                    "summons earn, and Northern Vengeance gains it each time it fires back at an attacker.",
                     new AcceptableValueRange<float>(0f, 1000f)));
 
             BaseExperience = Config.Bind("Leveling", "BaseExperience", 500f,
@@ -90,6 +91,7 @@ namespace EquipmentExperience
             ArmorExperiencePatch.Group().Apply(_harmony);
             SummonExperiencePatch.Group().Apply(_harmony);
             ProtectionExperiencePatch.Group().Apply(_harmony);
+            RetaliationExperiencePatch.Group().Apply(_harmony);
             TooltipPatch.Group().Apply(_harmony);
             if (ForgeUpgradePatch.Group().Apply(_harmony))
             {
@@ -122,6 +124,7 @@ namespace EquipmentExperience
                 ArmorExperiencePatch.Group(),
                 SummonExperiencePatch.Group(),
                 ProtectionExperiencePatch.Group(),
+                RetaliationExperiencePatch.Group(),
                 TooltipPatch.Group(),
                 ForgeUpgradePatch.Group(),
                 ForgePanelPatch.Group(),

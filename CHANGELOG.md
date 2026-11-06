@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.4
 
 - Fixed: the Trollstav never gained experience. It now gains experience when its trolls hit something, at the same
   rate as other summoning staves.

@@ -20,6 +20,11 @@ Decision log and gotchas that git history doesn't capture.
   `valheim_Data/StreamingAssets/SoftRef/Bundles`. That's how the staff attack chains were confirmed:
   StaffShield → `staff_shield_aoe` (an Aoe applying `Staff_shield`), and StaffSkeleton → `staff_skeleton_spawn`
   (a SpawnAbility spawning `Skeleton_Friendly`, which has levelUpFactor 0.5).
+  - To find a prefab's bundle, grep `SoftRef/manifest_extended` for `path in bundle: .../<Name>.prefab`; the line
+    before gives the bundle id. Most creatures, attacks and saddles are in `c4210710`.
+  - UnityPy has no wheels for the system Python 3.15 and fails to build; use `uv venv -p 3.12`.
+  - Reading a MonoBehaviour's `m_Script` fails (the script lives in another file), so identify components by their
+    typetree field names instead (e.g. `m_fedDuration` = Tameable, `m_maxStamina` + `m_attachAnimation` = Sadle).
 - **`Troll_Summoned` has no `Tameable`,** so nothing records who cast it (`SpawnAbility` only commands a Tameable) and
   vanilla gives no skill for its hits. `staff_greenroots_tentaroot` has none either.
 - **Northern Vengeance's orbs raise skill `None`:** `SE_React.OnDamaged` launches them with a fresh `HitData`, and

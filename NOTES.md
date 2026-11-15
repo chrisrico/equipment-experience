@@ -15,7 +15,8 @@ Decision log and gotchas that git history doesn't capture.
 - **Build environment on this machine:** there's no system .NET SDK; one was installed to a session scratchpad.
   BepInEx isn't in the Steam Valheim folder. It lives in the r2modman profile, so build with
   `-p:BepInExDir=~/.var/app/io.github.ebkr.r2modman/config/r2modmanPlus-local/Valheim/profiles/Default/BepInEx`.
-  `ilspycmd` 8.x needs `DOTNET_ROLL_FORWARD=Major` to run on .NET 8.
+  `ilspycmd` 8.x needs `DOTNET_ROLL_FORWARD=Major` to run on .NET 8. With only the .NET 8 SDK, a plain `dotnet tool install ilspycmd`
+  fails (the latest needs a newer SDK); pin `--version 8.2.0.7535`.
 - **Prefab data can be checked offline.** UnityPy reads the typetrees in
   `valheim_Data/StreamingAssets/SoftRef/Bundles`. That's how the staff attack chains were confirmed:
   StaffShield → `staff_shield_aoe` (an Aoe applying `Staff_shield`), and StaffSkeleton → `staff_skeleton_spawn`

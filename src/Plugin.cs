@@ -79,6 +79,7 @@ namespace EquipmentExperience
 
             NotifyWhenReady = Config.Bind("General", "NotifyWhenReady", true,
                 "Show a message when an item's experience bar becomes full.");
+            ItemMultipliers.BindConfig(Config);
             Guardians.BindConfig(Config);
             Tiers.BindConfig(Config);
 

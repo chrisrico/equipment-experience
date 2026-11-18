@@ -132,7 +132,7 @@ namespace EquipmentExperience
             {
                 return;
             }
-            amount *= Plugin.ExperienceRate.Value * Tiers.Multiplier(item, enemyTier);
+            amount *= Plugin.ExperienceRate.Value * ItemMultipliers.For(item) * Tiers.Multiplier(item, enemyTier);
             float required = GetRequired(item);
             float before = GetExperience(item);
             if (before >= required)

@@ -58,6 +58,7 @@ Config file: `BepInEx/config/nerdtastic.equipmentexperience.cfg`
 | Experience | `ArmorExperiencePerMaxHealth` | 12                | Experience for each worn piece from a hit equal to your max health (smaller hits give a proportional share). |
 | Experience | `ArmorShareOfBlockExperience` | 0.5               | Fraction of a block's experience (before the parry bonus) that each worn piece also gains. |
 | Experience | `ShieldStaffExperiencePerShield` | 10             | Experience for a Staff of Protection when its shield on you or a follower absorbs its full capacity (each hit gives its share). |
+| Experience | `ItemExperienceMultipliers` | `StaffThunderBlood:5` | `Prefab:multiplier` scaling for items that level unusually slowly or quickly. |
 | Tiers      | `LowerTierMultiplier`         | 0.8               | Multiplier per biome the enemy is below the item's tier. |
 | Tiers      | `HigherTierMultiplier`        | 1.2               | Multiplier per biome the enemy is above the item's tier. |
 | Tiers      | `EnemyTierOverrides`          | `Surtling:2, GoblinDeepNorth:7` | `Prefab:tier` exceptions to the enemy tier rules. |
@@ -94,6 +95,10 @@ harder to reach:
 | +4 | 1,690 | 420 | 1,015 |
 | +5 | 2,530 | 635 | 1,650 |
 | +6 | 3,800 | 950 | 2,600 |
+
+A few items raise their skill by much less than 1 per hit. Lightning Strike raises Elemental Magic by only 0.2 per
+cast, which would make it level about 6× slower than the Staff of Embers for the eitr spent, so by default
+`ItemExperienceMultipliers` gives it 5× experience. Add other items there by prefab name if they feel too slow or fast.
 
 To level everything faster or slower, change `ExperienceRate`. To flatten or steepen the curve, change
 `ExperienceGrowth`.

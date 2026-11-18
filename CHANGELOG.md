@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Lightning Strike gains 5× experience. It raises its skill by only 0.2 per cast, so it leveled about 6× slower
+  than the Staff of Embers. The new `ItemExperienceMultipliers` setting can scale any item's experience by prefab name.
+
 ## 1.0.4
 
 - Fixed: the Trollstav never gained experience. It now gains experience when its trolls hit something, at the same

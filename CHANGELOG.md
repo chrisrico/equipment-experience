@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.0.5
 
+- Fixed: 73 items the Forge of Potential can upgrade, including most Deep North gear and Lightning Strike, could
+  only be crafted to level 3, because level 4 needed a station level that no number of extensions reaches. The
+  required level is now capped at the station's highest level, so they can reach level 4 and go to the forge.
 - Lightning Strike gains 5× experience. It raises its skill by only 0.2 per cast, so it leveled about 6× slower
   than the Staff of Embers. The new `ItemExperienceMultipliers` setting can scale any item's experience by prefab name.
 

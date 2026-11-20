@@ -80,6 +80,7 @@ namespace EquipmentExperience
             NotifyWhenReady = Config.Bind("General", "NotifyWhenReady", true,
                 "Show a message when an item's experience bar becomes full.");
             ItemMultipliers.BindConfig(Config);
+            CastAdrenaline.BindConfig(Config);
             Guardians.BindConfig(Config);
             Tiers.BindConfig(Config);
 
@@ -94,6 +95,7 @@ namespace EquipmentExperience
             ProtectionExperiencePatch.Group().Apply(_harmony);
             RetaliationExperiencePatch.Group().Apply(_harmony);
             TooltipPatch.Group().Apply(_harmony);
+            CastAdrenaline.Group().Apply(_harmony);
             if (ForgeUpgradePatch.Group().Apply(_harmony))
             {
                 // The panel promises guaranteed upgrades, so only show it when the forge logic is active.
@@ -127,6 +129,7 @@ namespace EquipmentExperience
                 ProtectionExperiencePatch.Group(),
                 RetaliationExperiencePatch.Group(),
                 TooltipPatch.Group(),
+                CastAdrenaline.Group(),
                 ForgeUpgradePatch.Group(),
                 ForgePanelPatch.Group(),
                 Guardians.Requirements(),

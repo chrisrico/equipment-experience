@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Changed: crafting stations work as in the base game again. 1.0.5 lowered the station level needed to craft some
+  items to level 4; now the Forge of Potential takes those items from level 3, the highest a fully extended station
+  can craft them to. This covers 73 items, including most Deep North gear and Lightning Strike.
+
 ## 1.0.5
 
 - Fixed: 73 items the Forge of Potential can upgrade, including most Deep North gear and Lightning Strike, could

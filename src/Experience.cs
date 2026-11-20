@@ -20,7 +20,7 @@ namespace EquipmentExperience
         /// <summary>Game members everything in this class relies on, for <see cref="PatchGroup"/> startup checks.</summary>
         public static PatchGroup RequireCore(PatchGroup group)
         {
-            return group
+            return CraftingLevel.Require(group)
                 .RequireField(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.m_customData))
                 .RequireField(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_maxQuality))
                 .RequireField(typeof(ObjectDB), nameof(ObjectDB.m_recipes))
@@ -73,9 +73,13 @@ namespace EquipmentExperience
             return null;
         }
 
+        /// <summary>
+        /// Whether the item is as high as crafting can take it, which is where forge upgrades start. See
+        /// <see cref="CraftingLevel"/> for items whose station can't reach their m_maxQuality.
+        /// </summary>
         public static bool IsAtMaxCraftingLevel(ItemDrop.ItemData item)
         {
-            return item.m_shared.m_maxQuality > 1 && item.m_quality >= item.m_shared.m_maxQuality;
+            return item.m_shared.m_maxQuality > 1 && item.m_quality >= CraftingLevel.Max(item);
         }
 
         /// <summary>
@@ -96,7 +100,7 @@ namespace EquipmentExperience
         /// <summary>Experience needed to fill the bar at the item's current level.</summary>
         public static float GetRequired(ItemDrop.ItemData item)
         {
-            int forgeLevel = Math.Max(0, item.m_quality - item.m_shared.m_maxQuality);
+            int forgeLevel = Math.Max(0, item.m_quality - CraftingLevel.Max(item));
             return Plugin.BaseExperience.Value * Mathf.Pow(Plugin.ExperienceGrowth.Value, forgeLevel);
         }
 

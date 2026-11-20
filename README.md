@@ -28,14 +28,12 @@ the target level and your player name. With this mod:
 - **An upgrade needs a full bar, and then it always succeeds** if you have the right idol.
 - **Every upgrade awakens the forge's guardians.** Creatures from the idol's biome spawn around the forge and attack.
 - An item's experience shows in its tooltip. At the forge you also see the bar and the success chance.
-- **Every forge item can reach its maximum crafting level.** In the base game, most Deep North gear and several
-  Ashlands staffs (Lightning Strike, Staff of the Wild, Spirit Caller, ...) stop at level 3 because level 4 would need
-  a crafting station level past what every extension gives (a level 6 Galdr table or level 7 Black Forge). The mod caps
-  the required level at the station's highest, so a fully extended station can finish them.
 - Items below their maximum crafting level can't be upgraded at the Forge of Potential. Upgrade them at their normal
-  crafting station first. Experience earned before then counts toward the first forge upgrade, up to one full bar, and
-  carries over through workbench upgrades. An item you've used since crafting it can reach max level already ready for
-  the forge.
+  crafting station first. For most Deep North gear and several Ashlands staffs (Lightning Strike, Staff of the Wild,
+  Spirit Caller, ...) that's level 3: level 4 would need a station level past what every extension gives (a level 6
+  Galdr table or level 7 Black Forge), so the forge takes them from level 3. Experience earned before then counts
+  toward the first forge upgrade, up to one full bar, and carries over through workbench upgrades. An item you've used
+  since crafting it can reach max level already ready for the forge.
 
 Experience is stored in each item's custom data. It is saved with your character and stays with the item when it goes
 into a chest or to another player. A forge upgrade starts the new level with an empty bar.

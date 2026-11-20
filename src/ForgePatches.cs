@@ -104,7 +104,7 @@ namespace EquipmentExperience
             _pending = new PendingUpgrade
             {
                 IdolTier = Tiers.IdolTier(gui.m_craftRecipe),
-                ForgeLevel = item.m_quality + 1 - item.m_shared.m_maxQuality,
+                ForgeLevel = item.m_quality + 1 - CraftingLevel.Max(item),
                 ForgePosition = station.transform.position,
             };
             return true;

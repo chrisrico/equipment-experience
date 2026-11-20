@@ -35,13 +35,12 @@ Decision log and gotchas that git history doesn't capture.
 
 ## Decisions
 
-- 2026-11-18: Items stuck below max quality. Vanilla needs station level `m_minStationLevel + quality - 1`. Galdr
-  table (max 5) items with min 3, and Black Forge (max 6) items with min 4, top out at 3 (73 forge items, listed
-  from the recipe data with UnityPy). Cap the required level at the station's max (1 + distinct extension pieces in
-  ZNetScene) for forge items only. Done by transpiling the two callers (`Player.RequiredCraftingStation`,
-  `InventoryGui.UpdateRecipe`), not by patching `Recipe.GetRequiredStationLevel`, which is small enough for Mono to
-  inline. `PatchGroup.RequireCall` scans raw IL bytes because Harmony's IL reader throws DllNotFoundException in
-  GameApiCheck on .NET 8.
+- 2026-11-19: Items stuck below max quality (vanilla needs station level `m_minStationLevel + quality - 1`; Galdr
+  table (max 5) items with min 3 and Black Forge (max 6) items with min 4 top out at 3; 73 forge items, listed from
+  the recipe data with UnityPy). **Don't touch the stations** (user's call): 1.0.5 capped the required station level
+  via transpilers (fbbd574), and that was reverted. Instead `CraftingLevel.Max` lowers the item's "max crafting
+  level" to what a fully extended station reaches, and the forge gate, experience curve and guardian level count
+  from it. Vanilla's forge already accepts any quality and skips station level checks, so no forge patch was needed.
 
 - 2026-11-06: Staff audit. Trollstav and Northern Vengeance earned nothing and are fixed. The rest get experience from
   their own hits, including Fracturing (splinters inherit hit data) and Echo Spike (the outbound hit only; the return

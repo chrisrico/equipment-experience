@@ -50,54 +50,6 @@ namespace EquipmentExperience
             return this;
         }
 
-        /// <summary>
-        /// Requires that a game method still calls another one, for transpilers that replace that call. Checked
-        /// against the method's IL, so a game update that inlines or restructures the call disables the group.
-        /// </summary>
-        public PatchGroup RequireCall(Type type, string method, Type[] args, MethodInfo callee)
-        {
-            MethodBase original = AccessTools.Method(type, method, args);
-            if (original == null || callee == null)
-            {
-                return this; // reported by Patch or RequireMethod
-            }
-            try
-            {
-                if (!CallsInIl(original, callee))
-                {
-                    _missing.Add($"call to {callee.DeclaringType?.Name}.{callee.Name} in {type.Name}.{method}");
-                }
-            }
-            catch (Exception e)
-            {
-                _missing.Add($"readable IL of {type.Name}.{method} ({e.GetType().Name})");
-            }
-            return this;
-        }
-
-        /// <summary>
-        /// Looks for a call or callvirt to callee in the raw IL. Reads the bytes directly instead of through Harmony,
-        /// so tools/GameApiCheck can run it outside the game. Both methods must be in the same module for the
-        /// metadata token to match.
-        /// </summary>
-        private static bool CallsInIl(MethodBase method, MethodInfo callee)
-        {
-            byte[] il = method.GetMethodBody()?.GetILAsByteArray();
-            if (il == null || method.Module != callee.Module)
-            {
-                return false;
-            }
-            int token = callee.MetadataToken;
-            for (int i = 0; i + 4 < il.Length; i++)
-            {
-                if ((il[i] == 0x28 || il[i] == 0x6F) && BitConverter.ToInt32(il, i + 1) == token)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public PatchGroup Patch(Type patchClass, Type type, string method, Type[] args, HarmonyPatchType kind, string patchMethod)
         {
             MethodBase original = AccessTools.Method(type, method, args);
@@ -110,9 +62,8 @@ namespace EquipmentExperience
                                ?? throw new MissingMethodException(patchClass.Name, patchMethod);
             // Harmony passes the original's arguments to patch parameters by name, so a renamed parameter in a game
             // update would make patching throw. Special parameters (__instance, __result, ...) start with "__".
-            // A transpiler's parameters are Harmony's own (instructions, generator, original), not the original's.
             ParameterInfo[] originalParameters = original.GetParameters();
-            foreach (ParameterInfo parameter in kind == HarmonyPatchType.Transpiler ? new ParameterInfo[0] : patch.GetParameters())
+            foreach (ParameterInfo parameter in patch.GetParameters())
             {
                 if (!parameter.Name.StartsWith("__", StringComparison.Ordinal)
                     && Array.TrueForAll(originalParameters, p => p.Name != parameter.Name))
@@ -142,9 +93,7 @@ namespace EquipmentExperience
                     harmony.Patch(original,
                         prefix: kind == HarmonyPatchType.Prefix ? hm : null,
                         postfix: kind == HarmonyPatchType.Postfix ? hm : null,
-                        finalizer: kind == HarmonyPatchType.Finalizer ? hm : null,
-                        transpiler: kind == HarmonyPatchType.Transpiler ? hm : null,
-                        ilmanipulator: null);
+                        finalizer: kind == HarmonyPatchType.Finalizer ? hm : null);
                     applied.Add((original, patch));
                 }
             }

@@ -19,6 +19,11 @@ Decision log and gotchas that git history doesn't capture.
   fails (the latest needs a newer SDK); pin `--version 8.2.0.7535`.
 - **`tools/release.sh` on this machine:** export `BepInExDir` (MSBuild reads it from the environment), `DOTNET_ROOT`
   and `PATH` for the scratchpad SDK, and `DOTNET_ROLL_FORWARD=Major`. The script's confirmation prompt reads stdin.
+- **Reading item levels from a character save (`.fch`, under Steam `userdata/<id>/892970/remote/characters`):** items
+  are stored compactly (`ItemData.Save`): an int for durability, then bytes for x, y, world level and flags. Optional
+  fields follow, then the prefab name's `GetStableHashCode`, then the custom data. When scanning backwards from the
+  `EquipmentExperience.XP` key, try every start offset and keep only the one that decodes cleanly. Taking the first
+  match once misread a level 3 Lightning Strike as level 1.
 - **Prefab data can be checked offline.** UnityPy reads the typetrees in
   `valheim_Data/StreamingAssets/SoftRef/Bundles`. That's how the staff attack chains were confirmed:
   StaffShield → `staff_shield_aoe` (an Aoe applying `Staff_shield`), and StaffSkeleton → `staff_skeleton_spawn`

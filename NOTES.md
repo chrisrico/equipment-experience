@@ -4,6 +4,11 @@ Decision log and gotchas that git history doesn't capture.
 
 ## Gotchas
 
+- **The forge and crafting share one `Recipe`.** Vanilla has no separate forge recipe: the idol is just a requirement
+  with `m_upgraderResource` in the item's normal recipe, which other stations skip. Filtering out recipes with an
+  idol to find "the crafting recipe" finds nothing. That broke `CraftingLevel.Max` in 1.0.6: it fell back to
+  `m_maxQuality`, so level 3 Lightning Strike was told to reach max crafting level first.
+
 - **Not every skill gain goes through `Player.RaiseSkill`.** Some vanilla code calls `Skills.RaiseSkill` directly,
   and `WeaponExperiencePatch` never sees those calls. Blood magic does this in two places: `SE_Shield.IsDone` when a
   shield breaks, and `Character.RaiseSkill` on a tamed summon, which passes it on to its follow target. Dodge

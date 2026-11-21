@@ -7,8 +7,8 @@ namespace EquipmentExperience
     /// <summary>
     /// The highest level an item can be crafted to at its station. Usually that's m_maxQuality, but vanilla requires
     /// station level m_minStationLevel + (quality - 1). For many Ashlands and Deep North items that's more than the
-    /// station reaches with every extension built: Lightning Strike would need a level 6 Galdr table for quality 4,
-    /// and the table stops at 5. Those items stop at 3. The stations are left alone; instead the Forge of Potential
+    /// station reaches with every extension built: Lightning Strike (minimum Galdr table level 3) would need a level 6
+    /// table for quality 4, and the table stops at 5. Those items stop at 3. The stations are left alone; instead the Forge of Potential
     /// takes such items from the highest level they can actually be crafted to.
     /// </summary>
     public static class CraftingLevel
@@ -97,14 +97,16 @@ namespace EquipmentExperience
             return quality;
         }
 
-        /// <summary>The item's normal recipe: one at a crafting station, without an idol.</summary>
+        /// <summary>
+        /// The item's normal recipe: one at a crafting station other than the forge. Vanilla puts the idol in this same
+        /// recipe, as a requirement only the forge asks for, so a recipe with an idol must not be skipped.
+        /// </summary>
         private static Recipe CraftingRecipe(ObjectDB db, string itemName)
         {
             foreach (Recipe recipe in db.m_recipes)
             {
                 if (recipe != null && recipe.m_item != null && recipe.m_item.m_itemData.m_shared.m_name == itemName
-                    && recipe.m_craftingStation != null && !recipe.m_craftingStation.m_upgrader
-                    && Experience.GetIdol(recipe) == null)
+                    && recipe.m_craftingStation != null && !recipe.m_craftingStation.m_upgrader)
                 {
                     return recipe;
                 }

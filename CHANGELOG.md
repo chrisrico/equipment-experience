@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: the Forge of Potential still refused the 73 items that 1.0.6 meant to accept from level 3, including
+  Lightning Strike and most Deep North gear, saying they had to reach max crafting level first.
+
 ## 1.0.6
 
 - Changed: crafting stations work as in the base game again. 1.0.5 lowered the station level needed to craft some
